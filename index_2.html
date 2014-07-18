@@ -1,0 +1,44 @@
+<!doctype html>
+
+<html>
+<head>
+  <title> D3 tut</title>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+</head>
+
+<body>
+  <p>Smart Comments</p>
+  <script>
+  d3.select("p").text("Hello World");
+  d3.select("body").append("p").text("This is not a smart comment");
+
+
+  // csv test
+  var commentlist = [];
+  var comment = {id : 0,
+                 refTo : 0,
+                 time : "",
+                 vote : 0,
+                 comment : ""};
+  var csvdata;
+  d3.csv("afile.csv", function(data) {
+    data.forEach(function(d) {
+      d.date = formatDate.parse(d.date);
+      d.price = +d.price;
+    csv_data = data;
+  };
+
+
+/*
+  d3.csv("test_commtents.csv", function(error,data) {
+    data.forEach(function(d) {
+      d.id = parseID(d['ID']);
+    });
+  });
+
+  d3.select("body").append("p").text(ID);
+*/
+  </script>
+</body>
+
+</html>

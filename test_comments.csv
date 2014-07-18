@@ -1,0 +1,11 @@
+ID, Referred To, TimeStamp, Votes, Comment
+ 1, 0, 43124, -4, Meiner Meinung nach sind Smart Comments ueberfluessig! 
+ 2, 1, 23123,  2, Ich glaube deine Meinung ist unbegruendet!
+ 3, 1, 32444, -1, ich glaube du bist ueberfluessig!
+ 4, 0, 32321,  7, Ich finde das toll, die beiden Entwickler sollten Nationalhelden werden!
+ 5, 0, 55234, -4, Und was soll das der Menschheit nutzen?
+ 6, 5, 00953,  2, Vieleicht können die beiden echt was bewegen...
+ 7, 5, 32324,  9, Ich mag Zuege!
+ 8, 0, 55322,  2, geniales Konzept!
+ 9, 8, 88491,  8, ich werde den Entwicklern was spenden!
+10, 8, 88491,  8, Ich auch!
