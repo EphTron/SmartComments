@@ -8,11 +8,41 @@
 
 <body>
 	<p>Smart Comments</p>
+	
+	
+	
 	<script>
-	
-	
-		d3.select("p").text("Hello World");
-		d3.select("body").append("p").text("This is not a smart comment");
+		var canvas = d3.select("body")
+			.append("svg")
+			.attr("width", 500)
+			.attr("height", 500);
+		
+		var circle = canvas.append("circle")
+		  .attr("cx", 250)
+		  .attr("cy", 100)
+		  .attr("r", 50)
+		  .attr("fill", "blue");
+											 
+		var rect = canvas.append("rect")
+			.attr("width", 100)
+			.attr("height", 50);
+			
+		var line = canvas.append("line")
+			.attr("x1", 0)
+			.attr("y1", 100)
+			.attr("x2", 350)
+			.attr("y2", 180)
+			.attr("stroke", "green")
+			.attr("stroke-width", 2);
+												
+			
+		d3.select("body")
+			.append("p")
+			.text("This is not a smart comment");
+			
+		console.log(d3);
+		
+		
 	</script>
 </body>
 
