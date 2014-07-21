@@ -13,26 +13,34 @@
   <p>Smart Comments - CSV Test</p>
   <script>
 
-  // jQuery function for reading csv-files
-  function readCSV(filename) {
-    return $.csv.toObjects(filename);
-    
-  }
+  //var file = $.get("comments.csv");
+  //var data = $.csv.toObjects();
 
-  var dataset = readCSV("test_comments.csv");
-  console.log(dataset);
-/*
+  /*
   //read csv-files using d3-library
-  d3.csv("test_comments.csv", function(error, data) {
+  d3.csv("comments.csv", function(error, data) {
     // code for data manipulation has to be written inside the d3.csv 
     // function because of d3.csv being asyncronous 
     // function by default returns [Object, Object, ...]
     console.log(data);
     console.log(data[1]);
-    console.log(len(data));
   });
-*/
+  */
 
+var commentlist;
+d3.csv("comments.csv", function(data) {
+  commentlist = data.map(function(d) {
+    return[+d["id"],
+           +d["refto"],
+           +["time"],
+           +["date"]
+           +d["votes"],
+           +["comment"]
+          ]
+  });
+});
+console.log(commentlist);
+  
   </script>
 </body>
 
