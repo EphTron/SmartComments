@@ -16,17 +16,16 @@
   //var file = $.get("comments.csv");
   //var data = $.csv.toObjects();
 
-  /*
-  //read csv-files using d3-library
-  d3.csv("comments.csv", function(error, data) {
-    // code for data manipulation has to be written inside the d3.csv 
-    // function because of d3.csv being asyncronous 
-    // function by default returns [Object, Object, ...]
-    console.log(data);
-    console.log(data[1]);
-  });
-  */
+//read csv-files using d3-library
+d3.csv("comments.csv", function(error, data) {
+  // code for data manipulation has to be written inside the d3.csv 
+  // function because of d3.csv being asyncronous 
+  // function by default returns [Object, Object, ...]
+  console.log(data);
+  console.log(data[1]);
+});
 
+/*
 var commentlist;
 d3.csv("comments.csv", function(data) {
   commentlist = data.map(function(d) {
@@ -40,7 +39,8 @@ d3.csv("comments.csv", function(data) {
   });
 });
 console.log(commentlist);
-  
+*/
+
   </script>
 </body>
 
