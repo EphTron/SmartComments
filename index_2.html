@@ -1,16 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <meta charset="utf-8">
 
 <html>
 <head>
   <title> CSV-Test</title>
-  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="lib/d3/d3.min.js"></script>
+  <script src="lib/jquery/jquery-1.11.1.min.js"></script>
+  <script src="lib/jquery/csv/jquery.csv-0.71.min.js" ></script>
 </head>
 
 <body>
   <p>Smart Comments - CSV Test</p>
   <script>
 
+  // jQuery function for reading csv-files
+  function readCSV(filename) {
+    return $.csv.toObjects(filename);
+    
+  }
+
+  var dataset = readCSV("test_comments.csv");
+  console.log(dataset);
+/*
+  //read csv-files using d3-library
   d3.csv("test_comments.csv", function(error, data) {
     // code for data manipulation has to be written inside the d3.csv 
     // function because of d3.csv being asyncronous 
@@ -19,6 +31,7 @@
     console.log(data[1]);
     console.log(len(data));
   });
+*/
 
   </script>
 </body>
