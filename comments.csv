@@ -1,4 +1,4 @@
-id,refto,time,date,votes,comment
+id,refto,time,date,vote,comment
 1,0,14-22,12-04-2014,-4,"Meiner Meinung nach sind Smart Comments ueberfluessig!"
 2,1,14-22,12-04-2014,2,"Ich glaube deine Meinung ist unbegruendet!"
 3,1,14-22,12-04-2014,-1,"ich glaube du bist ueberfluessig!"
