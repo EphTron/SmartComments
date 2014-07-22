@@ -1,0 +1,103 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+	<style> 
+		div.bar { display: inline-block; width: 20px; height: 75px; background-color: teal; margin-right: 2px; }
+			.axis path, .axis line { fill: none; stroke: black; shape-rendering: crispEdges; } 
+			.axis text { font-family: sans-serif; font-size: 11px; } 
+	</style> 
+	<meta charset="utf-8"> 
+	<title>D3 Page Template</title>
+	<script type="text/javascript" src="d3.js">
+	</script> 
+</head> 
+<body> 
+	<p> ...click here to update diagram... </p> 
+	<script type="text/javascript"> 
+		var body = d3.select("body"); 
+		var dataset;
+		var foodset = []; 
+		var svg; 
+		var w; 
+		var h; 
+		var barPadding; 
+		var diaPadding;
+		var xScale; 
+		var yScale;
+		var xAxis;
+		var yAxis; 
+		
+		d3.csv("food.csv", function(data) {
+			dataset = data; 
+			dataset.forEach(function(d){ foodset.push(d.Food); });
+				initDia(); 
+				drawDia(); 
+		});
+		
+		d3.select("p") 
+			.on("click",function() { alert("click occured"); }); 
+			
+		function initDia() { 
+			w = 720; 
+			h = 480; 
+			barPadding = 1; 
+			diaPadding = 30; 
+			
+			xScale = d3.scale.ordinal() 
+				.domain(foodset) 
+				.rangeRoundBands([diaPadding, w], 0.05); 
+				
+			yScale = d3.scale.linear() 
+				.domain([0,d3.max(dataset, function(d) { return +d.Deliciousness })]) 
+				.range([h,diaPadding]); 
+				
+			xAxis = d3.svg.axis()
+				.scale(xScale) 
+				.orient("bottom"); 
+			yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left");
+			svg = body.append("svg") 
+				.attr("width", w) 
+				.attr("height", h); 
+		} 
+			
+		function drawDia() { 
+			svg.selectAll("rect") 
+				.data(dataset) 
+				.enter() 
+					.append("rect") 
+					.attr("x",function(d) { return xScale(d.Food); }) 
+					.attr("y",function(d) { return yScale(d.Deliciousness) - diaPadding; }) 
+					.attr("width", xScale.rangeBand()) 
+					.attr("height",function(d) { return h - yScale(d.Deliciousness); }) 
+					.attr("fill", function(d) {
+						var factor = yScale(d.Deliciousness)/h;
+						return "rgb(0, " + Math.ceil(109*factor) + ", " + Math.ceil(91*factor) + ")"; 
+						}); 
+						
+			svg.selectAll("text") 
+				.data(dataset) 
+				.enter() 
+					.append("text") 
+					.text(function(d) { return d.Deliciousness; }) 
+					.attr("x", function(d) { return xScale(d.Food) + xScale.rangeBand() / 2; }) 
+					.attr("y", function(d) { return yScale(d.Deliciousness) - diaPadding + 14; }) 
+					.attr("font-family", "sans-serif") 
+					.attr("font-size", "11px") 
+					.attr("fill", "white") 
+					.attr("text-anchor", "middle"); 
+					
+			svg.append("g") 
+				.attr("class", "axis") 
+				.attr("transform", "translate(0," + (h-diaPadding) + ")") 
+				.call(xAxis);
+				
+			svg.append("g") 
+				.attr("class","axis") 
+				.attr("transform", "translate(" + diaPadding + "," + -diaPadding + ")") 
+				.call(yAxis);
+		} 
+	</script> 
+</body> 
+</html>
