@@ -1,43 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
+<meta charset="utf-8">
 
 <html>
 <head>
-  <title> D3 tut</title>
-  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <title> CSV-Test</title>
+  <script src="lib/d3/d3.min.js"></script>
+  <script src="lib/jquery/jquery-1.11.1.min.js"></script>
+  <script src="lib/jquery/csv/jquery.csv-0.71.min.js" ></script>
 </head>
 
 <body>
-  <p>Smart Comments</p>
+  <p>Smart Comments - CSV Test</p>
   <script>
-  d3.select("p").text("Hello World");
-  d3.select("body").append("p").text("This is not a smart comment");
 
+  //var file = $.get("comments.csv");
+  //var data = $.csv.toObjects();
 
-  // csv test
-  var commentlist = [];
-  var comment = {id : 0,
-                 refTo : 0,
-                 time : "",
-                 vote : 0,
-                 comment : ""};
-  var csvdata;
-  d3.csv("afile.csv", function(data) {
-    data.forEach(function(d) {
-      d.date = formatDate.parse(d.date);
-      d.price = +d.price;
-    csv_data = data;
-  };
-
-
-/*
-  d3.csv("test_commtents.csv", function(error,data) {
-    data.forEach(function(d) {
-      d.id = parseID(d['ID']);
-    });
+  //read csv-files using d3-library
+  d3.csv("comments.csv", function(error, data) {
+    // code for data manipulation has to be written inside the d3.csv 
+    // function because of d3.csv being asyncronous 
+    // function by default returns [Object, Object, ...]
+    console.log(data);
+    console.log(data[1]);
   });
 
-  d3.select("body").append("p").text(ID);
-*/
+  /*
+  var commentlist;
+  d3.csv("comments.csv", function(data) {
+    commentlist = data.map(function(d) {
+      return[+d["id"],
+             +d["refto"],
+             +["time"],
+             +["date"]
+             +d["votes"],
+             +["comment"]
+            ]
+    });
+  });
+  console.log(commentlist);
+  */
+
   </script>
 </body>
 
