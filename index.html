@@ -3,24 +3,17 @@
 <head>
   <meta charset="utf-8">
   <title>Tutorial index</title>
-  
   <script type="text/javascript" src="lib/d3/d3.js"></script>
-  
-  <style type="text/css">
-    body {
-      margin: 5px;
-    }
-  </style>
-
+  <link rel="stylesheet" type"text/css" href="style.css">
 </head>
 <body>
 
   <script type="text/javascript">
-    var w = window.innerWidth -10;
+    var w = window.innerWidth -20;
     var h = 70;
     var bar_padding = 5
     var blowup = 1.5;
-    
+
     var dataset;
     d3.csv("ages.csv", function(error,data) {
       if(error) {
@@ -45,7 +38,7 @@
 
       //setup svg objects
       var svg = d3.select("body")
-                  .select("div", "top-bars")
+                  .select("div.topbars")
                   .append("svg")
                   .attr('width', w)
                   .attr('height', h+10);
@@ -61,6 +54,8 @@
                     .domain([0, ttl])
                     .range([0, w]);
 
+      var datablock = d3.select("body").select("div.answer").select("p.data");
+
       // create dynamic bars
       bars.attr("id", function(d,i) { return "r" + i; })
           .attr("x", function(d,i) { return calcX(d,i,scale,svg); })
@@ -69,14 +64,17 @@
           .attr("height", h)
           .attr("fill", function(d) {
                           return "rgb(40,100," + (d.age*2) + ")";
+                        })
+          .on("mouseover",  function(d) {
+                          datablock.text(d.name+" = "+d.age);
                         });
     }
   
-    function calcWidth(data,i,scale) {
+    function calcWidth(d,i,scale) {
       return scale(parseInt(dataset[i].age));
     }
 
-    function calcX(data,i,scale,svg) {
+    function calcX(d,i,scale,svg) {
       if(i == 0) {
         return 0;
       }
@@ -89,8 +87,10 @@
 
   </script>
 
-  <div class="top-bars"></div>
-  <div calss="answer"></div>
+  <div class="topbars"></div>
+  <div class="answer">
+    <p class="data"></p>
+  </div>
 
 </body>
 </html>
