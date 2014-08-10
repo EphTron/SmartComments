@@ -54,7 +54,8 @@
                     .domain([0, ttl])
                     .range([0, w]);
 
-      var datablock = d3.select("body").select("div.answer").select("p.data");
+      var answer = d3.select("body").select("div.answer");
+      var datablock = answer.select("p.data");
 
       // create dynamic bars
       bars.attr("id", function(d,i) { return "r" + i; })
@@ -66,8 +67,16 @@
                           return "rgb(40,100," + (d.age*2) + ")";
                         })
           .on("mouseover",  function(d) {
-                          datablock.text(d.name+" = "+d.age);
-                        });
+                              datablock.text(d.name+" = "+d.age);
+                              var id = parseInt(d.id);
+                              bars.select("#r"+id).attr("fill","red")
+                            })
+          .on("mouseout", function(d) {
+                            bars.attr("fill", function(d){
+                                                datablock.text("");
+                                                return "rgb(40,100," + (d.age*2) + ")";
+                                              })
+                          });
     }
   
     function calcWidth(d,i,scale) {
