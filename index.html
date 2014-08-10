@@ -62,7 +62,7 @@
                     .range([0, w]);
 
       // create dynamic bars
-      bars.attr("id", function(d,i) { return i; })
+      bars.attr("id", function(d,i) { return "r" + i; })
           .attr("x", function(d,i) { return calcX(d,i,scale,svg); })
           .attr("y", 0)
           .attr("width", function(d,i) { return calcWidth(d,i,scale) })
@@ -82,7 +82,7 @@
       }
       else {
         var wold = calcWidth(dataset,i-1,scale);
-        var xold = svg.select("rect[id='"+(i-1)+"']").attr('x')
+        var xold = svg.select("#r"+(i-1)).attr('x');
         return parseFloat(xold) + wold; 
       }
     }
@@ -90,6 +90,7 @@
   </script>
 
   <div class="top-bars"></div>
+  <div calss="answer"></div>
 
 </body>
 </html>
