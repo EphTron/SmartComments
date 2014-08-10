@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tutorial index</title>
+  
+  <script type="text/javascript" src="lib/d3/d3.js"></script>
+  <script type="text/javascript" src="lib/jQuery/jquery-1.11.1.min.js"></script>
+
+  <style type="text/css">
+    body {
+      margin: 5px;
+    }
+
+  </style>
+
+</head>
+<body>
+
+  <script type="text/javascript">
+    var w = window.innerWidth;
+    var h = 50;
+    var bar_padding = 5
+    var blowup = 1.5;
+    var window_height = window.innerHeight;
+    var window_width  = window.innerWidth;
+    console.log("window_width: " + window_width + " " + "window_height: " + window_height);
+
+    var dataset;
+    d3.csv("test.csv", function(error,data) {
+      if(error) {
+        console.log(error);
+      }
+      else {
+        dataset = data;
+        drawBarChart(data);
+      }
+    });
+
+    function drawBarChart(data) {
+
+      // get greatest value 
+      var max = d3.max(data,function(d) { return parseInt(d.age) });
+      var min = d3.min(data,function(d) { return parseInt(d.age) });
+
+      // define scale
+      var scale = d3.scale.linear()
+                    .domain([0, max])
+                    .range([0, h]);
+
+      //setup svg objects
+      var svg = d3.select("body")
+                  .select("div", "top-bars")
+                  .append("svg")
+                  .attr('width', w)
+                  .attr('height', h+10);
+
+      // define bars
+      var bars = svg.selectAll("rect")
+                    .data(data)
+                    .enter()
+                    .append("rect");
+
+      // create dynamic bars
+      bars.attr("x",  function(d,i) {
+                        return i * (w / data.length + 1);
+                      })
+          .attr("y", function(d) { return h-scale(d.age); })
+          .attr("width", w / data.length-bar_padding)
+          /*.attr("height", function(d) {
+            return d.age * blowup;
+          })*/
+          .attr("height", function(d) { return scale(d.age); })
+          .attr("fill", function(d) {
+                          return "rgb(" + (d.age) + ",0,0)";
+                        })
+          .attr("stroke", "black" );
+
+      // define labels to be printed 
+      var labels = svg.selectAll("text")
+                      .data(data)
+                      .enter()
+                      .append("text");
+      // create dynamic labels
+      labels.text(function(d) {return d.name;})
+            .attr("x",  function(d,i) {
+                        return i * (w / dataset.length) + (w / dataset.length - bar_padding) / 2;
+                      })
+            .attr("y", function(d) { return (h-scale(d.age))+14; })
+            .attr("fill", "white")
+            .attr("text-anchor", "middle");
+   }
+
+    function printData(data) {
+        d3.select("body").selectAll("div")
+          .data(data)
+          .enter()
+          .append("div")
+          .attr("class", "bar")
+          .text(function(d) { return d.name + " = " + d.age; });
+    }
+
+  </script>
+
+  <div class="top-bars"></div>
+
+</body>
+</html>
