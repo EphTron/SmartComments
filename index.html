@@ -64,19 +64,20 @@
           .attr("width", function(d,i) { return calcWidth(d,i,scale) })
           .attr("height", h)
           .attr("fill", function(d) {
-                          return "rgb(40,100," + (d.age*2) + ")";
-                        })
+                  return "rgb(40,100," + (d.age*2) + ")";
+                })
           .on("mouseover",  function(d) {
-                              datablock.text(d.name+" = "+d.age);
-                              var id = parseInt(d.id);
-                              bars.select("#r"+id).attr("fill","red")
-                            })
+                answer.style("border","1px solid black");
+                datablock.text(d.name+" = "+d.age);
+                svg.select("#r"+parseInt(d.id)).attr("fill","orange");
+              })
           .on("mouseout", function(d) {
-                            bars.attr("fill", function(d){
-                                                datablock.text("");
-                                                return "rgb(40,100," + (d.age*2) + ")";
-                                              })
-                          });
+                bars.attr("fill", function(d){
+                           return "rgb(40,100," + (d.age*2) + ")";
+                         })
+                answer.style("border", "0px solid black");
+                datablock.text("");
+              });
     }
   
     function calcWidth(d,i,scale) {
