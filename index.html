@@ -66,12 +66,39 @@
           .attr("fill", function(d) {
                   return "rgb(40,100," + (d.age*2) + ")";
                 })
-          .on("mouseover",  function(d) {
-                answer.transition()
-                      .duration(500)
-                      .style("border", "0px solid black")
-                      .style("width", "800px")
-                      .style("height", "200px");
+          .on("mouseover",  function(d,i) {
+                var rectX = svg.select("#r"+parseInt(d.id)).attr("x");
+                var rectW = svg.select("#r"+parseInt(d.id)).attr("width");
+                var rectcenter = (parseFloat(rectW/2)) + parseFloat(rectX);
+
+                // answer.transition()
+                      // .duration(500)
+                      // .style("border", "0px solid black")
+                      // .style("width", "800px")
+                      // .style("height", "200px");
+
+                if(rectcenter < 400)
+                  answer.transition()
+                        .duration(500)
+                        .style("width", "800px")
+                        .style("height", "200px")
+                        .style("margin-left", "0px");
+                else if (rectcenter > (w-400))
+                  answer.transition()
+                        .duration(500)
+                        .style("width", "800px")
+                        .style("height", "200px")
+                        .style("margin-left", (w-800)+"px");
+                else 
+                  answer.transition()
+                        .duration(500)
+                        .duration(500)
+                        .style("width", "800px")
+                        .style("height", "200px")
+                        .style("margin-left", (rectcenter-400)+"px");
+
+                if(rectcenter > (window.innerWidth-20)-400)
+                  answer.style("marginleft", "")
 
                 datablock.text(d.name+" = "+d.age);
 
