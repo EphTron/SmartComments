@@ -20,14 +20,12 @@ div.topbars {
 }
 
 div.answer {
-  margin-top: 10px;
   margin-left: 200px;
   margin-right: 200px;
   background-image: linear-gradient(white 0%, #9FBFD2 100%);
 }
 
 p.data {
-  margin: 20px;
   font-size: 16px;
   text-align: center;
 }

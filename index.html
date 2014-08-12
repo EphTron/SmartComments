@@ -57,7 +57,6 @@
       var answer = d3.select("body").select("div.answer");
       var datablock = answer.select("p.data");
 
-      answer.attr("height", 0);
       // create dynamic bars
       bars.attr("id", function(d,i) { return "r" + i; })
           .attr("x", function(d,i) { return calcX(d,i,scale,svg); })
@@ -70,7 +69,7 @@
           .on("mouseover",  function(d) {
                 answer.transition()
                       .duration(500)
-                      .style("border", "1px solid black")
+                      .style("border", "0px solid black")
                       .style("height", "200px");
 
                 datablock.text(d.name+" = "+d.age);
@@ -90,7 +89,7 @@
                 answer.transition()
                       .duration(200)
                       .style("border", "0px solid black")
-                      .style("height", "0px");
+                      .style("height", 0);                      
 
                 datablock.text("");
               });
