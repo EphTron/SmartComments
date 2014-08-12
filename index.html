@@ -70,6 +70,7 @@
                 answer.transition()
                       .duration(500)
                       .style("border", "0px solid black")
+                      .style("width", "800px")
                       .style("height", "200px");
 
                 datablock.text(d.name+" = "+d.age);
@@ -89,7 +90,8 @@
                 answer.transition()
                       .duration(200)
                       .style("border", "0px solid black")
-                      .style("height", 0);                      
+                      .style("width", "800px")
+                      .style("height", "0px");                      
 
                 datablock.text("");
               });
