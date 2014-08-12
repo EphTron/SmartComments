@@ -69,22 +69,29 @@
                 })
           .on("mouseover",  function(d) {
                 answer.transition()
-                      .duration(1000)
-                      .attr("height", 200)
+                      .duration(500)
                       .style("border", "1px solid black")
+                      .style("height", "200px");
 
                 datablock.text(d.name+" = "+d.age);
 
                 svg.select("#r"+parseInt(d.id))
                    .transition()
-                   .duration(100)
+                   .duration(200)
                    .attr("fill","orange");
               })
           .on("mouseout", function(d) {
-                bars.attr("fill", function(d){
+                bars.transition()
+                    .duration(200)
+                    .attr("fill", function(d){
                            return "rgb(40,100," + (d.age*2) + ")";
-                         })
-                answer.style("border", "0px solid black");
+                         });
+
+                answer.transition()
+                      .duration(200)
+                      .style("border", "0px solid black")
+                      .style("height", "0px");
+
                 datablock.text("");
               });
     }
