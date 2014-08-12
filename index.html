@@ -16,7 +16,7 @@
 
     var dataset;
     d3.csv("ages.csv", function(error,data) {
-      if(error) {
+      if(error) {s
         console.log(error);
       }
       else {
@@ -69,7 +69,10 @@
           .on("mouseover",  function(d) {
                 answer.style("border","1px solid black");
                 datablock.text(d.name+" = "+d.age);
-                svg.select("#r"+parseInt(d.id)).attr("fill","orange");
+                svg.select("#r"+parseInt(d.id))
+                   .transition()
+                   .duration(100)
+                   .attr("fill","orange");
               })
           .on("mouseout", function(d) {
                 bars.attr("fill", function(d){
@@ -79,7 +82,7 @@
                 datablock.text("");
               });
     }
-  
+
     function calcWidth(d,i,scale) {
       return scale(parseInt(dataset[i].age));
     }
@@ -97,6 +100,9 @@
 
   </script>
 
+  <div>
+    <p><h1>SmartComments</h1></p>
+  </div>
   <div class="topbars"></div>
   <div class="answer">
     <p class="data"></p>
