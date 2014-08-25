@@ -13,6 +13,8 @@
     var h = 50;
     var bar_padding = 5
     var blowup = 1.5;
+    var clickcounter = 0;
+    var lastID = -1;
 
     var dataset;
     d3.csv("ages.csv", function(error,data) {
@@ -91,6 +93,7 @@
                         .style("margin-left", (rectcenter-400)+"px");
   
                 datablock.text(d.name+" = "+d.age);
+                lastID = parseInt(d.id);
 
                 svg.select("#r"+parseInt(d.id))
                    .transition()
@@ -104,13 +107,17 @@
                            return "rgb(40,100," + (d.age*2) + ")";
                          });
 
-                answer.transition()
-                      .duration(200)
-                      .style("border", "0px solid black")
-                      .style("width", "800px")
-                      .style("height", "0px");                      
-
-                datablock.text("");
+                if((clickcounter % 2) == 0) {
+                  answer.transition()  
+                        .duration(200)
+                        .style("border", "0px solid black")
+                        .style("width", "800px")
+                        .style("height", "0px");
+                  datablock.text("");
+                }
+              })
+          .on("click", function(d) {
+                clickcounter += 1;
               });
     }
 
