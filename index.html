@@ -108,6 +108,8 @@
                          });
 
                 if((clickcounter % 2) == 0) {
+                  // div will not fold back together if clicked once
+                  // if clicked again the div will fold back to the top
                   answer.transition()  
                         .duration(200)
                         .style("border", "0px solid black")
