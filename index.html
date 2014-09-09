@@ -70,9 +70,7 @@
 						d["helpNeg"] = (d.helpAll - d.helpPos);
 						d["helpAvg"] = (d.helpPos - d.helpNeg);
 					});
-          
-         
-          
+
           minHelpAvg = d3.min(data,function(d) {
             return parseInt(d.helpAvg);
           });
@@ -80,16 +78,15 @@
             return parseInt(d.helpAvg)
           });
           
-          
           var posArray = [];
           dataset.forEach(function(d) {
             totalWidth +=  parseInt(mapTo(d.helpAvg));
-            
-            posArray.push({id: d.id, width: mapToScreen(d.helpAvg),x: curWidth});
+          });
+          dataset.forEach(function(d) {
+            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
 					});
-          console.log(posArray);
-					
+					console.log(posArray);
           
 					drawBarChart(dataset,posArray);
 				}
@@ -152,10 +149,11 @@
 			}
       
       function mapToScreen(val) {
+        console.log(totalWidth);
         var m = d3.scale.linear()
-								  .domain([0,343])
-								  .range([1,1100]);
-        return m(val);
+								  .domain([0,totalWidth])
+								  .range([1,w]);
+        return parseInt(m(mapTo(val)));
       }
       
       function mapTo(val) {
