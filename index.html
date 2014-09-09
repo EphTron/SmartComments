@@ -111,8 +111,8 @@
 								  .range([0,w]);
 								  
 				var colScl = d3.scale.linear()
-								  .domain([0,maxHelpful])
-								  .range(["red","green"]);
+								  .domain([minHelpAvg,0,maxHelpAvg])
+								  .range(["red","grey","green"]);
 								  
 				var textBox = d3.select(".smartComments")
 				                .select(".textBox")
@@ -123,7 +123,7 @@
 				    .attr("width", function(d,i) { return calcWidth(d,i,scl) })
 					.attr("height", h)
 					.attr("fill", function(d) {
-					    return colScl(parseInt(d.helpPos));
+					    return colScl(parseInt(d.helpAvg));
 					})
 					.on("mouseover",  function(d,i) {
 						var showPara = 1;
@@ -142,7 +142,8 @@
 				  
 				d3.select(".textInfo")
 				  .text("Sterne: "+ data.rating + "\n" + data.infoText);
-				} else if(showPara == 0){
+				} 
+				else if(showPara == 0){
 				d3.select(".textNr")
 				  .text("");
 				  
