@@ -86,7 +86,9 @@
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
           });
+
           console.log(posArray);
+          //console.log(posArray.sort(function(a,b) { return a.width - b.width }));
           
           drawBarChart(dataset,posArray);
         }
@@ -128,6 +130,9 @@
             .on("mouseout",function (d) {
               var showPara = 0;
               showInfo(d,showPara);
+            })
+            .on("click", function() { 
+              sortBars(posArray,svg);
             });
       }
       
@@ -149,7 +154,7 @@
       }
       
       function mapToScreen(val) {
-        console.log(totalWidth);
+        // console.log(totalWidth);
         var m = d3.scale.linear()
                   .domain([0,totalWidth])
                   .range([1,w]);
@@ -176,6 +181,34 @@
           return parseFloat(xold) + wold; 
         }
       }
+
+      var sortBars = function(posArray,svg) {
+        posArray.sort(function(a,b) { return a.width - b.width });
+        curWidth = 0;
+        console.log(posArray);
+        posArray.forEach(function(d,i) {
+                var w_tmp = posArray[i].width
+                console.log(w_tmp);
+                posArray[i].x = curWidth;
+                curWidth += w_tmp;
+        
+            svg.selectAll("rect")
+               .select("#r"+(posArray[i].id))
+               .transition()
+               .duration(1000)
+               .attr("x", function(d, i) {
+                  return posArray[i].x;
+                });
+        });
+      }   
+
+        // svg.selectAll("rect")
+        //    .transition()
+        //    .duration(1000)
+        //    .attr("x", function(d, i) {
+        //       return posArray[i].x;
+        //    });
+
 
     </script>
     <script>
