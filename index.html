@@ -152,10 +152,10 @@
 			}
       
       function mapToScreen(val) {
-        var s = d3.scale.linear()
-								  .domain([0,totalWidth])
-								  .range([1,w]);
-        return s(val);
+        var m = d3.scale.linear()
+								  .domain([0,343])
+								  .range([1,1100]);
+        return m(val);
       }
       
       function mapTo(val) {
