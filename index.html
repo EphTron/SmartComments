@@ -58,6 +58,7 @@
       var maxHelpAvg = 0;
       var totalWidth = 0;
       var curWidth = 0;
+      var correct = 0;
       
 			var dataset;
 			d3.csv("bag.csv", function(error,data){
@@ -82,11 +83,21 @@
           dataset.forEach(function(d) {
             totalWidth +=  parseInt(mapTo(d.helpAvg));
           });
+          
+          var w_tmp = 0;
           dataset.forEach(function(d) {
+            w_tmp += mapToScreen(d.helpAvg);
+          });
+          if (w_tmp > w){
+            correct = (w_tmp - w) + 60;
+          }else if (w_tmp < w){
+            correct = (w_tmp - w) - 50;
+          }
+          
+          dataset.forEach(function(d,i) {
+            curWidth += posArray[i].width;
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
-            curWidth += mapToScreen(d.helpAvg);
 					});
-					console.log(posArray);
           
 					drawBarChart(dataset,posArray);
 				}
@@ -113,7 +124,6 @@
 								  .range(["red","lightgray","green"]);
 								
 				bars.attr("id", function(d,i) { return "r" + i; })
-				    //.attr("x", function(d,i) { return calcX(d,i,scl,svg); })
             .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
 				    .attr("width", function(d,i) { return posArray[i].width })
@@ -149,10 +159,10 @@
 			}
       
       function mapToScreen(val) {
-        console.log(totalWidth);
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
-								  .range([1,w]);
+								  .range([1,w-correct]);
+                  console.log(w-correct);
         return parseInt(m(mapTo(val)));
       }
       
@@ -162,10 +172,6 @@
                   .range([1,10]);
         return parseInt(s(val));
       }
-      
-			//function calcWidth(d,i,scale) {
-			//	return scale(preScl(parseInt(dataset[i].helpAvg)));
-			//}
 
 			function calcX(d,i,scale,svg) {
 				if(i == 0) {
