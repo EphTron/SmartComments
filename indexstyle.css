@@ -1,0 +1,64 @@
+html {
+  height: 100%;
+}
+
+body {
+  color: black;
+  background-color: white;
+  padding: 0;
+  text-align: center;
+  font-family: 'open sans';
+  position: relative;
+  margin: 0;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrapper {
+	height: 100% !important;
+	height: 100%;
+	margin: 0 auto; 
+	overflow: hidden;
+}
+
+.main {
+	float: left;
+	width: 100%;
+	margin: 0 auto;
+}
+
+.mainFrame{
+	position: relative;
+	margin-left: auto;
+    margin-right: auto;
+    width: 1100px;
+	background-color: lightgray;
+}
+
+.productPicture{
+	float: left;
+	width: 50%;
+	height: 450px;
+	background-color: white;
+}
+
+.productInfo{
+	float: right;
+	width: 50%;
+	height: 450px;
+	background-color: white;
+}
+
+.smartComments{
+	float: left;
+	width: 100%;
+	height: 750px;
+	background-color: lightgray;
+}
+
+.barChart{
+}
+
+.textBox{
+	background-color: red;
+}
