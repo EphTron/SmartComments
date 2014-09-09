@@ -56,8 +56,9 @@
 			var lastID = -1;
       var minHelpAvg = 0;
       var maxHelpAvg = 0;
-      var posArray = [];
-			
+      var totalWidth = 0;
+      var curWidth = 0;
+      
 			var dataset;
 			d3.csv("bag.csv", function(error,data){
 				if(error) {
@@ -70,20 +71,33 @@
 						d["helpAvg"] = (d.helpPos - d.helpNeg);
 					});
           
+         
+          
           minHelpAvg = d3.min(data,function(d) {
             return parseInt(d.helpAvg);
           });
-				
           maxHelpAvg = d3.max(data,function(d) {
             return parseInt(d.helpAvg)
           });
+          
+          
+          var posArray = [];
+          dataset.forEach(function(d) {
+            totalWidth +=  parseInt(mapTo(d.helpAvg));
+            
+            posArray.push({id: d.id, width: mapToScreen(d.helpAvg),x: curWidth});
+            curWidth += mapToScreen(d.helpAvg);
+					});
+          console.log(posArray);
 					
-					drawBarChart(dataset);
+          
+					drawBarChart(dataset,posArray);
 				}
 			});
-			
-			function drawBarChart(data) {
+
       
+			function drawBarChart(data,posArray) {
+        
         var svg = d3.select(".barChart")
                     .append("svg")
                     .attr("width", w)
@@ -93,27 +107,19 @@
                       .data(data)
                       .enter()
                       .append("rect");
+                      
+        var textBox = d3.select(".smartComments")
+				                .select(".textBox")
         
-				var ttl = 0;
-				for (var i = 0; i < data.length; i++){
-					ttl += preScl(parseInt(data[i].helpAvg));
-				}
-        console.log(ttl);
-        var scl = d3.scale.linear()
-								  .domain([0,ttl])
-								  .range([1,w]);
-								  
 				var colScl = d3.scale.linear()
 								  .domain([minHelpAvg,0,maxHelpAvg])
 								  .range(["red","lightgray","green"]);
-								  
-				var textBox = d3.select(".smartComments")
-				                .select(".textBox")
 								
 				bars.attr("id", function(d,i) { return "r" + i; })
-				    .attr("x", function(d,i) { return calcX(d,i,scl,svg); })
+				    //.attr("x", function(d,i) { return calcX(d,i,scl,svg); })
+            .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
-				    .attr("width", function(d,i) { return calcWidth(d,i,scl) })
+				    .attr("width", function(d,i) { return posArray[i].width })
             .attr("height", h)
             .attr("fill", function(d) {
 					    return colScl(parseInt(d.helpAvg));
@@ -145,22 +151,29 @@
 				}
 			}
       
-      function preScl(val) {
+      function mapToScreen(val) {
         var s = d3.scale.linear()
-                  .domain([minHelpAvg,maxHelpAvg])
-                  .range([1,1]);
+								  .domain([0,totalWidth])
+								  .range([1,w]);
         return s(val);
       }
       
-			function calcWidth(d,i,scale) {
-				return scale(preScl(parseInt(dataset[i].helpAvg)));
-			}
+      function mapTo(val) {
+        var s = d3.scale.linear()
+                  .domain([minHelpAvg,maxHelpAvg])
+                  .range([1,10]);
+        return parseInt(s(val));
+      }
+      
+			//function calcWidth(d,i,scale) {
+			//	return scale(preScl(parseInt(dataset[i].helpAvg)));
+			//}
 
 			function calcX(d,i,scale,svg) {
 				if(i == 0) {
 					return 0;
 				} else {
-					var wold = calcWidth(dataset,i-1,scale);
+					var wold = mapToScreen(posArray[i-1].width);
 					var xold = svg.select("#r"+(i-1)).attr('x');
 					return parseFloat(xold) + wold; 
 				}
