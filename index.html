@@ -33,6 +33,8 @@
 				<section class="page2">
 				  <div class="smartComments">
 							<h4>Kundenrezensionen</h4>
+							<div class="sortButtons">
+							</div>
 							<div class="barChart">
 							</div>
 							<div class="textBox">
@@ -63,7 +65,8 @@
 					dataset = data;
 					
 					dataset.forEach(function(d) {
-						d["helpNeg"] = (d.helpAll - d.helpPos);
+						d["helpNeg"] = (d.helpAll - d.helpPos) * (-1);
+						d["helpAvg"] = (d.helpPos + d.helpNeg);
 					});
 					
 					drawBarChart(dataset);
@@ -79,11 +82,11 @@
 					return parseInt(d.rating);
 				});
 			
-				var minHelpful = d3.min(data,function(d) {
-					return parseInt(d.helpPos);
+				var minHelpAvg = d3.min(data,function(d) {
+					return parseInt(d.helpNeg);
 				});
 				
-				var maxHelpful = d3.max(data,function(d) {
+				var maxHelpAvg = d3.max(data,function(d) {
 					return parseInt(d.helpPos)
 				});
 				
@@ -94,7 +97,7 @@
 				}
 				
 				var svg = d3.select(".barChart")
-					        .append("svg")23
+					        .append("svg")
 							.attr("width", w)
 							.attr("height", h + 10);
 							
@@ -108,13 +111,12 @@
 								  .range([0,w]);
 								  
 				var colScl = d3.scale.linear()
-								  .domain([minHelpful,maxHelpful])
-								  .range(["gray","green"]);
+								  .domain([0,maxHelpful])
+								  .range(["red","green"]);
 								  
 				var textBox = d3.select(".smartComments")
 				                .select(".textBox")
 								
-				
 				bars.attr("id", function(d,i) { return "r" + i; })
 				    .attr("x", function(d,i) { return calcX(d,i,scl,svg); })
 					.attr("y", 0)
