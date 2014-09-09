@@ -122,8 +122,9 @@
                   datablock.text("");
                 }
               })
-          .on("click", function(d) {
-                clickcounter += 1;
+          .on("click", function() {
+                //clickcounter += 1;
+                sortBars(svg,scale);
               });
     }
 
@@ -140,6 +141,19 @@
         var xold = svg.select("#r"+(i-1)).attr('x');
         return parseFloat(xold) + wold; 
       }
+    }
+
+    function sortBars(svg,scale) {
+      svg.selectAll("rect")
+         .sort(function(a,b) { 
+            return d3.ascending(a,b);
+          })
+         .transition()
+         .duration(1000)
+         .attr("x", function(d,i) { 
+            return calcX(d,i,scale,svg);
+          });
+
     }
 
   </script>
