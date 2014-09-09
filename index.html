@@ -38,6 +38,10 @@
       for(var i = 0; i < data.length; i++)
         ttl += parseInt(data[i].age);
 
+      // add menu items
+      var menu = d3.select("body")
+                   .select("p.menu");
+
       //setup svg objects
       var svg = d3.select("body")
                   .select("div.topbars")
@@ -142,6 +146,7 @@
 
   <div class="headline">
     <p><h1>SmartComments</h1></p>
+    <p class="menu"></p>
   </div>
 
   <div class="topbars"></div>
