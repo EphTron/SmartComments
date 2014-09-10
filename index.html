@@ -61,6 +61,7 @@
       var curWidth = 0;
       var correct = 0;
       var posArray = [];
+      var sortMode = 0;
       
       var dataset;
       d3.csv("bag.csv", function(error,data){
@@ -80,7 +81,6 @@
           maxHelpAvg = d3.max(data,function(d) {
             return parseInt(d.helpAvg)
           });
-          
           
           dataset.forEach(function(d) {
             totalWidth += parseInt(mapTo(d.helpAvg));
@@ -184,7 +184,7 @@
         //sortiert die Liste im Hintergrun
         curWidth = 0;
         posArray.sort(function(a,b) { 
-          return a.width - b.width 
+          return b.width - a.width 
         });
         // verarbeitet die visuelle Ausgabe
         posArray.forEach(function(d,i) {
