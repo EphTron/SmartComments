@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
-    <head>
+  <head>
       <title>Visu Beleg</title>
       <link rel="stylesheet" href="indexstyle.css">
       <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
       <script type="text/javascript" src="d3/d3.v3.js"></script>
-      <!--<script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script> -->
-      <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+      <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script>
+      <!--<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
       <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
 
       <meta charset="UTF-8">
-    </head>
-    <body>
+  </head>
+  <body>
     <div class="wrapper">
       <div class="main">
         
         <section class="page1">
-        <div class="mainFrame">
+        <div class="productFrame">
             <h1>Product</h1>
             <div class="productPicture">
               <img src="./pictures/bag.png" alt="Picture Bag">
@@ -50,7 +50,7 @@
     </div>
     
     <script type="text/javascript">
-        
+    
       var w = 1100;
       var h = 50;
       var clickcounter = 0;
@@ -81,23 +81,22 @@
             return parseInt(d.helpAvg)
           });
           
-          
           dataset.forEach(function(d) {
-            totalWidth += parseInt(mapTo(d.helpAvg));
+            totalWidth += mapTo(d.helpAvg);
           });
           
           var w_tmp = 0;
           dataset.forEach(function(d) {
             w_tmp += mapToScreen(d.helpAvg);
           });
+
           if (w_tmp > w){
-            correct = (w_tmp - w) + 60;
+            correct = (w_tmp - w);
           }else if (w_tmp < w){
-            correct = (w_tmp - w) - 50;
+            correct = (w_tmp - w);
           }
           
           dataset.forEach(function(d,i) {
-            //curWidth += posArray[i].width;
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
           });
@@ -121,7 +120,6 @@
                       
         var textBox = d3.select(".smartComments")
                         .select(".textBox")
-        
 
         var colScl = d3.scale.linear()
                        .domain([minHelpAvg,0,maxHelpAvg])
@@ -133,7 +131,7 @@
             .attr("width", function(d,i) { return posArray[i].width })
             .attr("height", h)
             .attr("fill", function(d) {
-              return colScl(parseInt(d.helpAvg));
+              return colScl(d.helpAvg);
             })
             .on("mouseover",  function(d,i) {
               var showPara = 1;
@@ -168,28 +166,24 @@
       function mapToScreen(val) {
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
-								  .range([1,w]);
-                  //console.log(w-correct);
-        return parseInt(m(mapTo(val)));
+								  .range([1,w-correct]);
+        return m(mapTo(val));
       }
       
       function mapTo(val) {
         var s = d3.scale.linear()
                   .domain([minHelpAvg,maxHelpAvg])
                   .range([1,10]);
-        return parseInt(s(val));
+        return s(val);
       }
 
       var sortBars = function(posArray,svg) {
-        //sortiert die Liste im Hintergrun
         curWidth = 0;
         posArray.sort(function(a,b) { 
           return a.width - b.width 
         });
-        // verarbeitet die visuelle Ausgabe
         posArray.forEach(function(d,i) {
           var w_tmp = posArray[i].width
-          console.log(w_tmp);
           posArray[i].x = curWidth;
           curWidth += w_tmp;
 
@@ -204,13 +198,13 @@
 
     </script>
     <script>
-      $(document).ready(function(){
-        $(".main").onepage_scroll({
-        sectionContainer: "section",
-        responsiveFallback: 600,
-        loop: false
-        });
-      });
-    </script>
-    </body>
+		  $(document).ready(function(){
+			  $(".main").onepage_scroll({
+				sectionContainer: "section",
+				responsiveFallback: 600,
+				loop: false
+				});
+		  });
+		</script>
+  </body>
 </html>
