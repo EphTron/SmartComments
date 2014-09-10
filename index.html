@@ -61,6 +61,7 @@
       var curWidth = 0;
       var correct = 0;
       var posArray = [];
+      var sortMode = 0;
       
       var dataset;
       d3.csv("bag.csv", function(error,data){
@@ -180,7 +181,7 @@
       var sortBars = function(posArray,svg) {
         curWidth = 0;
         posArray.sort(function(a,b) { 
-          return a.width - b.width 
+          return b.width - a.width 
         });
         posArray.forEach(function(d,i) {
           var w_tmp = posArray[i].width
