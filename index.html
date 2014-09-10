@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Visu Beleg</title>
-    <link rel="stylesheet" href="indexstyle.css">
-    <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
-    <script type="text/javascript" src="d3/d3.v3.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
+      <title>Visu Beleg</title>
+      <link rel="stylesheet" href="indexstyle.css">
+      <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
+      <script type="text/javascript" src="d3/d3.v3.js"></script>
+      <!--<script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script> -->
+      <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+      <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
 
-    <meta charset="UTF-8">
+      <meta charset="UTF-8">
     </head>
     <body>
     <div class="wrapper">
@@ -38,10 +39,10 @@
               <div class="barChart">
               </div>
               <div class="textBox">
-                <p class="textNummer"></p>
+                <p class="textID"></p>
+                <p class="textNr"></p>
                 <p class="textTitle"></p>
                 <p class="textInfo"></p>
-                
               </div>
           </div>
         </section>
@@ -111,11 +112,10 @@
                         .select(".textBox")
         
         var colScl = d3.scale.linear()
-                  .domain([minHelpAvg,0,maxHelpAvg])
-                  .range(["red","lightgray","green"]);
+                       .domain([minHelpAvg,0,maxHelpAvg])
+                       .range(["red","lightgray","green"]);
                 
         bars.attr("id", function(d,i) { return "r" + i; })
-            //.attr("x", function(d,i) { return calcX(d,i,scl,svg); })
             .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
             .attr("width", function(d,i) { return posArray[i].width })
@@ -131,25 +131,25 @@
               var showPara = 0;
               showInfo(d,showPara);
             })
-            .on("click", function() { 
-              sortBars(posArray,svg);
+            .on("click", function(d,i) { 
+              sortBars(posArray,svg,i);
             });
       }
       
       function showInfo(data, showPara){
         if (showPara == 1){
-        d3.select(".textNr")
-          .text("Kundenrezension Nr.:" + data.id + " von " + data.name );
-          
-        d3.select(".textInfo")
-          .text("Sterne: "+ data.rating + "\n" + data.infoText);
+          d3.select(".textNr")
+            .text("Kundenrezension Nr.:" + data.id + " von " + data.name );
+            
+          d3.select(".textInfo")
+            .text("Sterne: "+ data.rating + "\n" + data.infoText);
         } 
         else if(showPara == 0){
-        d3.select(".textNr")
-          .text("");
-          
-        d3.select(".textInfo")
-          .text("");
+          d3.select(".textNr")
+            .text("");
+            
+          d3.select(".textInfo")
+            .text("");
         }
       }
       
@@ -168,10 +168,6 @@
         return parseInt(s(val));
       }
       
-      //function calcWidth(d,i,scale) {
-      //  return scale(preScl(parseInt(dataset[i].helpAvg)));
-      //}
-
       function calcX(d,i,scale,svg) {
         if(i == 0) {
           return 0;
@@ -182,7 +178,7 @@
         }
       }
 
-      var sortBars = function(posArray,svg) {
+      var sortBars = function(posArray,svg,i) {
         posArray.sort(function(a,b) { return a.width - b.width });
         curWidth = 0;
         console.log(posArray);
@@ -191,24 +187,16 @@
                 console.log(w_tmp);
                 posArray[i].x = curWidth;
                 curWidth += w_tmp;
-        
-            svg.selectAll("rect")
-               .select("#r"+(posArray[i].id))
-               .transition()
-               .duration(1000)
-               .attr("x", function(d, i) {
-                  return posArray[i].x;
-                });
+                console.log("a.x: "+posArray[i].x + " a.id: "+posArray[i].id+" a.width: "+posArray[i].width);
+
+          svg.select("#r"+(posArray[i].id))
+             .transition()
+             .duration(1000)
+             .attr("x", function(d) {
+                return posArray[i].x;
+              });
         });
-      }   
-
-        // svg.selectAll("rect")
-        //    .transition()
-        //    .duration(1000)
-        //    .attr("x", function(d, i) {
-        //       return posArray[i].x;
-        //    });
-
+      }
 
     </script>
     <script>
