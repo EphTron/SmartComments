@@ -11,66 +11,67 @@
     <meta charset="UTF-8">
     </head>
     <body>
-		<div class="wrapper">
-			<div class="main">
-				
-				<section class="page1">
-				<div class="mainFrame">
-						<h1>Product</h1>
-						<div class="productPicture">
-							<img src="./pictures/bag.png" alt="Picture Bag">
-						</div>
-						<div class="productInfo">
-							<h4>MUMIENSCHLAFSACK LIGHT 600 4651</h4>
-							<p>von Unbekannt</p>
-							<p><img src="./pictures/stars.png" alt="Picture Stars"> 84 Kundenrezensionen</p>
-							<p>Preis:  17,90</p>
-							<p>AUF LAGER</p>
-						</div>
-				</div>
-				</section>
-					
-				<section class="page2">
-				  <div class="smartComments">
-							<h4>Kundenrezensionen</h4>
-							<div class="sortButtons">
-							</div>
-							<div class="barChart">
-							</div>
-							<div class="textBox">
-								<p class="textNummer"></p>
-								<p class="textTitle"></p>
-								<p class="textInfo"></p>
-								
-							</div>
-				  </div>
-				</section>
-			</div>
-		</div>
-		
-		<script type="text/javascript">
-			  
-			var w = 1100;
-			var h = 50;
-			var clickcounter = 0;
-			var lastID = -1;
+    <div class="wrapper">
+      <div class="main">
+        
+        <section class="page1">
+        <div class="mainFrame">
+            <h1>Product</h1>
+            <div class="productPicture">
+              <img src="./pictures/bag.png" alt="Picture Bag">
+            </div>
+            <div class="productInfo">
+              <h4>MUMIENSCHLAFSACK LIGHT 600 4651</h4>
+              <p>von Unbekannt</p>
+              <p><img src="./pictures/stars.png" alt="Picture Stars"> 84 Kundenrezensionen</p>
+              <p>Preis:  17,90</p>
+              <p>AUF LAGER</p>
+            </div>
+        </div>
+        </section>
+          
+        <section class="page2">
+          <div class="smartComments">
+              <h4>Kundenrezensionen</h4>
+              <div class="sortButtons">
+              </div>
+              <div class="barChart">
+              </div>
+              <div class="textBox">
+                <p class="textNummer"></p>
+                <p class="textTitle"></p>
+                <p class="textInfo"></p>
+                
+              </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    
+    <script type="text/javascript">
+        
+      var w = 1100;
+      var h = 50;
+      var clickcounter = 0;
+      var lastID = -1;
       var minHelpAvg = 0;
       var maxHelpAvg = 0;
       var totalWidth = 0;
       var curWidth = 0;
       var correct = 0;
+      var posArray = [];
       
-			var dataset;
-			d3.csv("bag.csv", function(error,data){
-				if(error) {
-					console.log(error);
-				} else {
-					dataset = data;
-					
-					dataset.forEach(function(d) {
-						d["helpNeg"] = (d.helpAll - d.helpPos);
-						d["helpAvg"] = (d.helpPos - d.helpNeg);
-					});
+      var dataset;
+      d3.csv("bag2.csv", function(error,data){
+        if(error) {
+          console.log(error);
+        } else {
+          dataset = data;
+          
+          dataset.forEach(function(d) {
+            d["helpNeg"] = (d.helpAll - d.helpPos);
+            d["helpAvg"] = (d.helpPos - d.helpNeg);
+          });
 
           minHelpAvg = d3.min(data,function(d) {
             return parseInt(d.helpAvg);
@@ -79,9 +80,9 @@
             return parseInt(d.helpAvg)
           });
           
-          var posArray = [];
+          
           dataset.forEach(function(d) {
-            totalWidth +=  parseInt(mapTo(d.helpAvg));
+            totalWidth += parseInt(mapTo(d.helpAvg));
           });
           
           var w_tmp = 0;
@@ -95,41 +96,46 @@
           }
           
           dataset.forEach(function(d,i) {
-            curWidth += posArray[i].width;
+            //curWidth += posArray[i].width;
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
-					});
+            curWidth += mapToScreen(d.helpAvg);
+          });
+
+          console.log(posArray);
+          //console.log(posArray.sort(function(a,b) { return a.width - b.width }));
           
-					drawBarChart(dataset,posArray);
-				}
-			});
+          drawBarChart(dataset,posArray);
+        }
+      });
 
       
-			function drawBarChart(data,posArray) {
+      function drawBarChart(data,posArray) {
         
         var svg = d3.select(".barChart")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h + 10);
-							
-				var bars = svg.selectAll("rect")
+              
+        var bars = svg.selectAll("rect")
                       .data(data)
                       .enter()
                       .append("rect");
                       
         var textBox = d3.select(".smartComments")
-				                .select(".textBox")
+                        .select(".textBox")
         
-				var colScl = d3.scale.linear()
-								  .domain([minHelpAvg,0,maxHelpAvg])
-								  .range(["red","lightgray","green"]);
-								
-				bars.attr("id", function(d,i) { return "r" + i; })
+
+        var colScl = d3.scale.linear()
+                  .domain([minHelpAvg,0,maxHelpAvg])
+                  .range(["red","lightgray","green"]);
+                
+        bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
-				    .attr("width", function(d,i) { return posArray[i].width })
+            .attr("width", function(d,i) { return posArray[i].width })
             .attr("height", h)
             .attr("fill", function(d) {
-					    return colScl(parseInt(d.helpAvg));
+              return colScl(parseInt(d.helpAvg));
             })
             .on("mouseover",  function(d,i) {
               var showPara = 1;
@@ -138,31 +144,34 @@
             .on("mouseout",function (d) {
               var showPara = 0;
               showInfo(d,showPara);
+            })
+            .on("click", function() { 
+              sortBars(posArray,svg);
             });
-			}
-			
-			function showInfo(data, showPara){
-				if (showPara == 1){
-				d3.select(".textNr")
-				  .text("Kundenrezension Nr.:" + data.id + " von " + data.name );
-				  
-				d3.select(".textInfo")
-				  .text("Sterne: "+ data.rating + "\n" + data.infoText);
-				} 
-				else if(showPara == 0){
-				d3.select(".textNr")
-				  .text("");
-				  
-				d3.select(".textInfo")
-				  .text("");
-				}
-			}
+      }
+      
+      function showInfo(data, showPara){
+        if (showPara == 1){
+        d3.select(".textNummer")
+          .text("Kundenrezension Nr.:" + data.id + " von " + data.name + " X: ");
+          
+        d3.select(".textInfo")
+          .text("Sterne: "+ data.rating + "\n" + data.infoText);
+        } 
+        else if(showPara == 0){
+        d3.select(".textNummer")
+          .text("");
+          
+        d3.select(".textInfo")
+          .text("");
+        }
+      }
       
       function mapToScreen(val) {
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
-								  .range([1,w-correct]);
-                  console.log(w-correct);
+								  .range([1,w]);
+                  //console.log(w-correct);
         return parseInt(m(mapTo(val)));
       }
       
@@ -173,25 +182,51 @@
         return parseInt(s(val));
       }
 
-			function calcX(d,i,scale,svg) {
-				if(i == 0) {
-					return 0;
-				} else {
-					var wold = mapToScreen(posArray[i-1].width);
-					var xold = svg.select("#r"+(i-1)).attr('x');
-					return parseFloat(xold) + wold; 
-				}
-			}
+      var sortBars = function(posArray,svg) {
+        //sortiert die Liste im Hintergrund
+        curWidth = 0;
+        posArray.sort(function(a,b) { 
+          return a.width - b.width 
+        });
+        
+        console.log(posArray);
+        // verarbeitet die visuelle Ausgabe
+        posArray.forEach(function(d,i) {
+          var w_tmp = posArray[i].width;
+          
+          posArray[i].x = curWidth;
+          //console.log(posArray);
+          curWidth += w_tmp;
+          svg.select("#r"+i)
+           .transition()
+           .duration(1000)
+           .attr("x", function(d, i) {
+              return getNewX(i);
+           });
+        });
 
-		</script>
-		<script>
-		  $(document).ready(function(){
-			  $(".main").onepage_scroll({
-				sectionContainer: "section",
-				responsiveFallback: 600,
-				loop: false
-				});
-		  });
-		</script>
+        
+        //console.log(svg.select("#r78").attr("x"));
+      }   
+      
+      function getNewX(i){
+        console.log("gotNewX");
+        return posArray[i].x;
+        
+      }
+    
+
+
+
+    </script>
+    <!-- <script>
+      $(document).ready(function(){
+        $(".main").onepage_scroll({
+        sectionContainer: "section",
+        responsiveFallback: 600,
+        loop: false
+        });
+      });
+    </script> -->
     </body>
 </html>
