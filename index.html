@@ -102,23 +102,58 @@
             curWidth += mapToScreen(d.helpAvg);
           });
           
-          drawBarChart(dataset,posArray);
+          var buttonData = [];
+          buttonData = setupButtons();
+
+          drawBarChart(dataset,posArray,buttonData);
         }
       });
 
-      
-      function drawBarChart(data,posArray) {
-        
+      function setupButtons() {
+
+        var buttArray = [{state:"helpful",     value:0},
+                         {state:"not helpful", value:1},
+                         {state:"number <",    value:2},
+                         {state:"number >",    value:3},
+                         {state:"hure",value:33}];
+
+        var svg = d3.select(".sortButtons")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", 30);
+
+        var buttons = svg.selectAll("rect")
+                         .data(buttArray)
+                         .enter()
+                         .append("rect");
+
+        var labels = svg.selectAll("text")
+                        .data(buttArray)
+                        .enter()
+                        .append("text");
+
+        var values = [buttons,labels,buttArray];
+        return values;
+      }
+
+      function drawBarChart(data,posArray,buttonData) {
+
+        var buttons = buttonData[0];
+        var labels = buttonData[1];
+        var buttArray = buttonData[2];
+
+        var buttonCount = buttArray.length; 
+
         var svg = d3.select(".barChart")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h + 10);
-              
+
         var bars = svg.selectAll("rect")
                       .data(data)
                       .enter()
                       .append("rect");
-                      
+
         var textBox = d3.select(".smartComments")
                         .select(".textBox")
 
@@ -141,10 +176,27 @@
             .on("mouseout",function (d) {
               var showPara = 0;
               showInfo(d,showPara);
-            })
-            .on("click", function(d,i) { 
-              sortBars(posArray,svg,i);
             });
+        
+        buttons.attr("id", function(d,i) { return "b"+i; })
+               .attr("x", function(d,i) { return i*(w/buttonCount); })
+               .attr("y", 0)
+               .attr("width", function(d,i) { return (w/buttonCount)-20; })
+               .attr("height", 25)
+               .attr("rx", 12)
+               .attr("ry", 12)
+               .attr("fill", "lightgrey")
+               .on("click", function(d) { 
+                  sortMode = d.value;
+                  sortBars(posArray,svg,sortMode);
+                });
+
+        labels.text(function(d,i) { return buttArray[i].state; })
+              .attr("x", function(d,i) { return i*(w/buttonCount) + ((w/buttonCount)/2-10);  })
+              .attr("y", 18)
+              .attr("width", function(d,i) { return (w/buttonCount)-20; })
+              .attr("height", 20)
+              .attr("text-anchor", "middle");
       }
       
       function showInfo(data, showPara){
@@ -178,11 +230,23 @@
         return s(val);
       }
 
-      var sortBars = function(posArray,svg) {
+
+      var sortBars = function(posArray,svg,sortmode) {
         curWidth = 0;
-        posArray.sort(function(a,b) { 
-          return b.width - a.width 
-        });
+
+       if(sortmode  == 0){
+          posArray.sort(function(a,b) { 
+            return a.width - b.width 
+          });        
+       } else if(sortmode == 1) {
+          posArray.sort(function(a,b) { 
+            return b.width - a.width 
+          });
+        } else if(sortmode == 2) {
+          posArray.sort(function(a,b) { 
+            return a.width - b.width 
+          });
+        }
         posArray.forEach(function(d,i) {
           var w_tmp = posArray[i].width
           posArray[i].x = curWidth;

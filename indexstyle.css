@@ -56,6 +56,10 @@ body {
 	background-color: white;
 }
 
+.sortButtons{
+    padding-left: 20px;
+} 
+
 .barChart{
   background-color: white;
 }
