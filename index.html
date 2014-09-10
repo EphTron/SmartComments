@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Visu Beleg</title>
-    <link rel="stylesheet" href="indexstyle.css">
-    <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
-    <script type="text/javascript" src="d3/d3.v3.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
+      <title>Visu Beleg</title>
+      <link rel="stylesheet" href="indexstyle.css">
+      <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
+      <script type="text/javascript" src="d3/d3.v3.js"></script>
+      <!--<script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script> -->
+      <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+      <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
 
-    <meta charset="UTF-8">
+      <meta charset="UTF-8">
     </head>
     <body>
     <div class="wrapper">
@@ -38,10 +39,10 @@
               <div class="barChart">
               </div>
               <div class="textBox">
-                <p class="textNummer"></p>
+                <p class="textID"></p>
+                <p class="textNr"></p>
                 <p class="textTitle"></p>
                 <p class="textInfo"></p>
-                
               </div>
           </div>
         </section>
@@ -62,7 +63,7 @@
       var posArray = [];
       
       var dataset;
-      d3.csv("bag2.csv", function(error,data){
+      d3.csv("bag.csv", function(error,data){
         if(error) {
           console.log(error);
         } else {
@@ -100,9 +101,6 @@
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
           });
-
-          console.log(posArray);
-          //console.log(posArray.sort(function(a,b) { return a.width - b.width }));
           
           drawBarChart(dataset,posArray);
         }
@@ -126,8 +124,8 @@
         
 
         var colScl = d3.scale.linear()
-                  .domain([minHelpAvg,0,maxHelpAvg])
-                  .range(["red","lightgray","green"]);
+                       .domain([minHelpAvg,0,maxHelpAvg])
+                       .range(["red","lightgray","green"]);
                 
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
@@ -145,21 +143,21 @@
               var showPara = 0;
               showInfo(d,showPara);
             })
-            .on("click", function() { 
-              sortBars(posArray,svg);
+            .on("click", function(d,i) { 
+              sortBars(posArray,svg,i);
             });
       }
       
       function showInfo(data, showPara){
         if (showPara == 1){
-        d3.select(".textNummer")
+        d3.select(".textNr")
           .text("Kundenrezension Nr.:" + data.id + " von " + data.name + " X: ");
           
         d3.select(".textInfo")
           .text("Sterne: "+ data.rating + "\n" + data.infoText);
         } 
         else if(showPara == 0){
-        d3.select(".textNummer")
+        d3.select(".textNr")
           .text("");
           
         d3.select(".textInfo")
@@ -183,43 +181,29 @@
       }
 
       var sortBars = function(posArray,svg) {
-        //sortiert die Liste im Hintergrund
+        //sortiert die Liste im Hintergrun
         curWidth = 0;
         posArray.sort(function(a,b) { 
           return a.width - b.width 
         });
-        
-        console.log(posArray);
         // verarbeitet die visuelle Ausgabe
         posArray.forEach(function(d,i) {
-          var w_tmp = posArray[i].width;
-          
+          var w_tmp = posArray[i].width
+          console.log(w_tmp);
           posArray[i].x = curWidth;
-          //console.log(posArray);
           curWidth += w_tmp;
-          svg.select("#r"+i)
-           .transition()
-           .duration(1000)
-           .attr("x", function(d, i) {
-              return getNewX(i);
-           });
+
+          svg.select("#r"+(posArray[i].id))
+             .transition()
+             .duration(1000)
+             .attr("x", function(d) {
+                return posArray[i].x;
+              });
         });
-
-        
-        //console.log(svg.select("#r78").attr("x"));
-      }   
-      
-      function getNewX(i){
-        console.log("gotNewX");
-        return posArray[i].x;
-        
       }
-    
-
-
 
     </script>
-    <!-- <script>
+    <script>
       $(document).ready(function(){
         $(".main").onepage_scroll({
         sectionContainer: "section",
@@ -227,6 +211,6 @@
         loop: false
         });
       });
-    </script> -->
+    </script>
     </body>
 </html>
