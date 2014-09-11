@@ -52,7 +52,7 @@
     </div>
 
     <script type="text/javascript">
- 
+
       var w = window.innerWidth - 50;
       var h = 50;
       var lastID = -1;
@@ -64,7 +64,7 @@
       var posArray = [];
       var sortMode = 0;
       var clicked = 1;
-      
+
       var dataset;
       d3.csv("bag.csv", function(error,data){
         if(error) {
@@ -122,10 +122,7 @@
                          .enter()
                          .append("rect");
 
-        var pointer = barSVG.selectAll("polygon")
-                            .data(data)
-                            .enter()
-                            .append("polygon");
+        var pointer = barSVG.append("polygon");
 
         var textBox = d3.select(".smartComments")
                         .select(".textBox")
@@ -182,15 +179,16 @@
         var bCnt = buttArray.length; // buttonCount
         clickState=[0,0,0,0,0];
 
-        pointer.attr("id", function(d,i) { return "p"+i })
+        pointer.attr("id", "p")
                .style("fill", "white")
-               .style("stroke", "white")
-               .attr("points", function(d,i) {
-                 var width = findByID(posArray,i).width;
-                 var x = findByID(posArray,i).x;
-                 var x1 = x+(width/2);
-                 return (x1+","+50+","+(x1-5)+","+60+","+(x1+5)+","+60);
-               });
+               .style("stroke", "white");
+               
+               // .attr("points", function(d,i) {
+               //   var width = findByID(posArray,i).width;
+               //   var x = findByID(posArray,i).x;
+               //   var x1 = x+(width/2);
+               //   return (x1+","+50+","+(x1-5)+","+60+","+(x1+5)+","+60);
+               // });
 
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
@@ -206,15 +204,20 @@
                     .transition()
                     .duration(150)
                     .attr("fill", "gold");
+
               var getRectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
               var rectX = getRectX;
               var showPara = 1;
-              // showPointer(barSVG,id);
               showInfo(d,textBox,showPara,rectX);
-              
-              barSVG.select("#p"+parseInt(d.id))
+
+              var width = findByID(posArray,i).width;
+              var x = findByID(posArray,i).x;
+              var x1 = x+(width/2);
+
+              barSVG.select("#p")
                     .style("fill", "gold")
-                    .style("stroke", "gold");
+                    .style("stroke", "gold")
+                    .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
 
             })
             .on("mouseout",function (d) {
@@ -225,7 +228,7 @@
               var showPara = 0;
               showInfo(d,showPara);
 
-              barSVG.select("#p"+parseInt(d.id))
+              barSVG.select("#p")
                     .style("fill", "white")
                     .style("stroke", "white");
             });
@@ -252,7 +255,7 @@
               .attr("width", function(d,i) { return (w/bCnt)-20; })
               .attr("height", 20)
               .attr("text-anchor", "middle");
-              
+
         marker.attr("id", function(d,i) { return "m"+i; })
               .style("stroke", "black")
               .style("fill", "black")
@@ -262,10 +265,10 @@
                           (i*(w/bCnt)+(w/bCnt)-30)+","+13);
                });
       }
-      
+
       function showInfo(data, textBox, showPara, rectX){
 
-        if (showPara == 1){        
+        if (showPara == 1){
           d3.select(".textNr")
             .text("Nr.:" + data.id);
           d3.select(".textNr")
@@ -273,7 +276,7 @@
           d3.select(".textInfo")
             .text("Sterne: "+ data.rating + "\n" + data.infoText);
           textStyle(textBox,rectX);
-        } 
+        }
         else if(showPara == 0){
           d3.select(".textNr")
             .text("");
@@ -281,7 +284,7 @@
             .text("");
         }
       }
-      
+
       function textStyle(textBox, rectX) {
         if(rectX < 400) {
           textBox.transition()
@@ -303,7 +306,7 @@
             .style("margin-left", (rectX-400+25)+"px");
         }
       };
-      
+
       function mapToScreen(val) {
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
@@ -357,23 +360,24 @@
         console.log(buttonID);
         var points = svg.select("#m"+buttonID).attr("points");
         var pntArray = points.split(",").map(Number);
-        
+
         if(buttonState > 0) {
           svg.select("#m"+buttonID)
              .attr("transform", "rotate("+180+","+(pntArray[0]+5) +","+pntArray[5]+")");
         } else if (buttonState < 0) {
           svg.select("#m"+buttonID)
-             .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");          
+             .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");
         }
       }
 
       function findByID(src,id) {
-        return src.filter( function(obj) { 
+        return src.filter( function(obj) {
           return +obj.id == id;
         })[0];
       }
 
     </script>
+
     <script>
 		  $(document).ready(function(){
 			  $(".main").onepage_scroll({
