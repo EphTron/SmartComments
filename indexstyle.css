@@ -66,8 +66,8 @@ body {
     user-select: none;
 }
  
-
 .barChart{
+  height: 60px;
   background-color: white;
 }
 
