@@ -5,8 +5,8 @@
       <link rel="stylesheet" href="indexstyle.css">
       <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
       <script type="text/javascript" src="d3/d3.v3.js"></script>
-      <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script>
-      <!--<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
+      <!-- <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script> -->
+      <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
       <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
 
       <meta charset="UTF-8">
@@ -39,10 +39,12 @@
               <div class="barChart">
               </div>
               <div class="textBox">
-                <p class="textID"></p>
-                <p class="textNr"></p>
-                <p class="textTitle"></p>
-                <p class="textInfo"></p>
+                <div class="textNr"></div>
+                <div class="textAuthor"></div>
+                <div class="textStars"></div>
+                <div class="textTitle"></div>
+                <div class="textInfo"></div>
+                <div class="textHelp"></div>
               </div>
           </div>
         </section>
@@ -51,7 +53,7 @@
     
     <script type="text/javascript">
     
-      var w = 1100;
+      var w = window.innerWidth - 50;
       var h = 50;
       var clickcounter = 0;
       var lastID = -1;
@@ -141,7 +143,6 @@
         var buttons = buttonData[0];
         var labels = buttonData[1];
         var buttArray = buttonData[2];
-
         var buttonCount = buttArray.length; 
 
         var svg = d3.select(".barChart")
@@ -155,25 +156,36 @@
                       .append("rect");
 
         var textBox = d3.select(".smartComments")
-                        .select(".textBox")
+                        .select(".textBox");
 
         var colScl = d3.scale.linear()
-                       .domain([minHelpAvg,0,maxHelpAvg])
-                       .range(["red","lightgray","green"]);
+                       .domain([minHelpAvg,maxHelpAvg])
+                       .range(["red","green"]);
                 
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
             .attr("width", function(d,i) { return posArray[i].width })
             .attr("height", h)
+            .attr("stroke","white")
             .attr("fill", function(d) {
               return colScl(d.helpAvg);
             })
             .on("mouseover",  function(d,i) {
+              svg.select("#r"+parseInt(d.id))
+                 .transition()
+                 .duration(150)
+                 .attr("fill", "gold");
+              var getRectX = svg.select("#r"+parseInt(d.id)).attr("x");
+              var rectX = getRectX;
               var showPara = 1;
-              showInfo(d,showPara);
+              showInfo(d,textBox,showPara,rectX);
             })
             .on("mouseout",function (d) {
+              svg.select("#r"+parseInt(d.id))
+                 .transition()
+                 .duration(150)
+                 .attr("fill", colScl(d.helpAvg));
               var showPara = 0;
               showInfo(d,showPara);
             });
@@ -199,13 +211,17 @@
               .attr("text-anchor", "middle");
       }
       
-      function showInfo(data, showPara){
+      function showInfo(data, textBox, showPara, rectX){
         if (showPara == 1){
+        
         d3.select(".textNr")
-          .text("Kundenrezension Nr.:" + data.id + " von " + data.name + " X: ");
+          .text("Nr.:" + data.id);
+        d3.select(".textNr")
+          .text("Nr.:" + data.id);
           
         d3.select(".textInfo")
           .text("Sterne: "+ data.rating + "\n" + data.infoText);
+        textStyle(textBox,rectX);
         } 
         else if(showPara == 0){
         d3.select(".textNr")
@@ -215,6 +231,28 @@
           .text("");
         }
       }
+      
+      function textStyle(textBox, rectX) {
+        if(rectX < 400) {
+          textBox.transition()
+            .duration(180)
+            .style("width", "800px")
+            .style("height", "200px")
+            .style("margin-left", 25+"px");
+        } else if (rectX > (w-400)) {
+          textBox.transition()
+            .duration(180)
+            .style("width", "800px")
+            .style("height", "200px")
+            .style("margin-left", (w-800+25)+"px");
+        } else {
+          textBox.transition()
+            .duration(180)
+            .style("width", "800px")
+            .style("height", "200px")
+            .style("margin-left", (rectX-400+25)+"px");
+        }
+      };
       
       function mapToScreen(val) {
         var m = d3.scale.linear()
@@ -254,7 +292,7 @@
 
           svg.select("#r"+(posArray[i].id))
              .transition()
-             .duration(1000)
+             .duration(800)
              .attr("x", function(d) {
                 return posArray[i].x;
               });
