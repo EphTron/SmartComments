@@ -215,10 +215,11 @@
               var x1 = x+(width/2);
 
               barSVG.select("#p")
+                    .transition()
+                    .duration(180)
                     .style("fill", "gold")
                     .style("stroke", "gold")
                     .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
-
             })
             .on("mouseout",function (d) {
               barSVG.select("#r"+parseInt(d.id))
@@ -229,6 +230,8 @@
               showInfo(d,showPara);
 
               barSVG.select("#p")
+                    .transition()
+                    .duration(180)
                     .style("fill", "white")
                     .style("stroke", "white");
             });
