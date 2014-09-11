@@ -122,6 +122,11 @@
                          .enter()
                          .append("rect");
 
+        var pointer = barSVG.selectAll("polygon")
+                            .data(data)
+                            .enter()
+                            .append("polygon");
+
         var textBox = d3.select(".smartComments")
                         .select(".textBox")
 
@@ -130,8 +135,8 @@
                            .range(["red","lightgray","green"]);
 
         //button setup
-        var buttArray = [{id:0 ,state:"helpful", value:1},
-                         {id:1 ,state:"number",  value:2},
+        var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
+                         {id:1 ,state:"sort by: number",  value:2},
                          {id:2 ,state:"none",    value:3},
                          {id:3 ,state:"none",    value:4},
                          {id:4 ,state:"none",    value:5}];
@@ -155,9 +160,9 @@
         var marker = buttonSVG.selectAll("polygon")
                               .data(buttArray)
                               .enter()
-                              .append("polygon")
+                              .append("polygon");
 
-        var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale];
+        var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer];
         return values;
       }
 
@@ -172,6 +177,7 @@
         var marker    = setupData[6];
         var textBox   = setupData[7];
         var colScl    = setupData[8];
+        var pointer   = setupData[9];
 
         var bCnt = buttArray.length; // buttonCount
         clickState=[0,0,0,0,0];
@@ -187,9 +193,9 @@
             })
             .on("mouseover",  function(d,i) {
               barSVG.select("#r"+parseInt(d.id))
-                 .transition()
-                 .duration(150)
-                 .attr("fill", "gold");
+                    .transition()
+                    .duration(150)
+                    .attr("fill", "gold");
               var getRectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
               var rectX = getRectX;
               var showPara = 1;
@@ -346,14 +352,9 @@
         
         if(buttonState > 0) {
           svg.select("#m"+buttonID)
-             .transition()
-             .duration(800)
              .attr("transform", "rotate("+180+","+(pntArray[0]+5) +","+pntArray[5]+")");
-             //.attr("transform", "rotate(90,"+100+","+10+")");
         } else if (buttonState < 0) {
           svg.select("#m"+buttonID)
-             .transition()
-             .duration(800)
              .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");          
         }
       }
