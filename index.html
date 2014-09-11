@@ -6,7 +6,7 @@
       <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
       <script type="text/javascript" src="d3/d3.v3.js"></script>
       <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script>
-      <!--<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
+      <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
       <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
 
       <meta charset="UTF-8">
@@ -34,7 +34,7 @@
         <section class="page2">
           <div class="smartComments">
               <h4>Kundenrezensionen</h4>
-              <div class="sortButtons">
+              <div class="sortButtons" unselectable="yes" onselectstart="return false">
               </div>
               <div class="barChart">
               </div>
@@ -53,7 +53,6 @@
     
       var w = 1100;
       var h = 50;
-      var clickcounter = 0;
       var lastID = -1;
       var minHelpAvg = 0;
       var maxHelpAvg = 0;
@@ -62,6 +61,7 @@
       var correct = 0;
       var posArray = [];
       var sortMode = 0;
+      var clicked = 1;
       
       var dataset;
       d3.csv("bag.csv", function(error,data){
@@ -103,64 +103,79 @@
           });
           
           var buttonData = [];
-          buttonData = setupButtons();
+          buttonData = setup(data);
 
-          drawBarChart(dataset,posArray,buttonData);
+          draw(dataset,posArray,buttonData);
         }
       });
 
-      function setupButtons() {
+      function setup(data) {
 
-        var buttArray = [{id:0 ,state:"helpful",     value:0},
-                         {id:1 ,state:"not helpful", value:1},
-                         {id:2 ,state:"number <",    value:2},
-                         {id:3 ,state:"number >",    value:3},
-                         {id:4 ,state:"hure",        value:3}];
-
-        var svg = d3.select(".sortButtons")
-                    .append("svg")
-                    .attr("width", w)
-                    .attr("height", 30);
-
-        var buttons = svg.selectAll("rect")
-                         .data(buttArray)
-                         .enter()
-                         .append("rect");
-
-        var labels = svg.selectAll("text")
-                        .data(buttArray)
-                        .enter()
-                        .append("text");
-
-        var values = [buttons,labels,buttArray];
-        return values;
-      }
-
-      function drawBarChart(data,posArray,buttonData) {
-
-        var buttons = buttonData[0];
-        var labels = buttonData[1];
-        var buttArray = buttonData[2];
-
-        var buttonCount = buttArray.length; 
-
-        var svg = d3.select(".barChart")
+        //bar setup
+        var barSVG = d3.select(".barChart")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h + 10);
 
-        var bars = svg.selectAll("rect")
-                      .data(data)
-                      .enter()
-                      .append("rect");
+        var bars = barSVG.selectAll("rect")
+                         .data(data)
+                         .enter()
+                         .append("rect");
 
         var textBox = d3.select(".smartComments")
                         .select(".textBox")
 
-        var colScl = d3.scale.linear()
-                       .domain([minHelpAvg,0,maxHelpAvg])
-                       .range(["red","lightgray","green"]);
-                
+        var colorScale = d3.scale.linear()
+                           .domain([minHelpAvg,0,maxHelpAvg])
+                           .range(["red","lightgray","green"]);
+
+        //button setup
+        var buttArray = [{id:0 ,state:"helpful", value:1},
+                         {id:1 ,state:"number",  value:2},
+                         {id:2 ,state:"none",    value:3},
+                         {id:3 ,state:"none",    value:4},
+                         {id:4 ,state:"none",    value:5}];
+
+        var buttonSVG = d3.select(".sortButtons")
+                          .append("svg")
+                          .attr("width", w)
+                          .attr("height", 30);
+
+        var buttons = buttonSVG.selectAll("rect")
+                               .data(buttArray)
+                               .enter()
+                               .append("rect");
+
+        var labels = buttonSVG.selectAll("text")
+                              .data(buttArray)
+                              .enter()
+                              .append("text");
+
+        var marker = buttonSVG.selectAll("polygon")
+                              .data(buttArray)
+                              .enter()
+                              .append("polygon")
+
+        var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale];
+        return values;
+      }
+
+      function draw(data,posArray,buttonData) {
+
+        var buttonSVG = buttonData[0];
+        var barSVG    = buttonData[1];
+        var bars      = buttonData[2];
+        var buttons   = buttonData[3];
+        var labels    = buttonData[4];
+        var buttArray = buttonData[5];
+        var marker    = buttonData[6];
+        var textBox   = buttonData[7];
+        var colScl    = buttonData[8];
+        
+        var bCnt = buttArray.length;
+        clickState=[0,0,0,0,0];
+            
+
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
@@ -179,25 +194,38 @@
               showInfo(d,showPara);
             });
         
+        marker.attr("id", function(d,i) { return "m"+i; })
+              .style("stroke", "black")
+              .style("fill", "black")
+              .attr("points", function(d,i) {
+                  return (i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
+                         (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
+                         (i*(w/bCnt)+(w/bCnt)-30)+","+13;
+               });
+
         buttons.attr("id", function(d,i) { return "b"+i; })
-               .attr("x", function(d,i) { return i*(w/buttonCount); })
+               .attr("x", function(d,i) { return i*(w/bCnt); })
                .attr("y", 0)
-               .attr("width", function(d,i) { return (w/buttonCount)-20; })
+               .attr("width", function(d,i) { return (w/bCnt)-20; })
                .attr("height", 25)
                .attr("rx", 12)
                .attr("ry", 12)
                .attr("fill", "lightgrey")
                .on("click", function(d) { 
-                  sortMode = d.value;
-                  sortBars(posArray,svg,sortMode);
+                  clicked = clicked*-1;
+                  var buttonState = clicked*d.value;
+                  sortBars(posArray,barSVG,buttonState);
+                  changeMarkerState(marker,buttonState,d.id);
                 });
 
-        labels.text(function(d,i) { return buttArray[i].state; })
-              .attr("x", function(d,i) { return i*(w/buttonCount) + ((w/buttonCount)/2-10);  })
+        labels.attr("id", function(d,i) { return "l"; })
+              .text(function(d,i) { return buttArray[i].state; })
+              .attr("x", function(d,i) { return i*(w/bCnt) + ((w/bCnt)/2-10);  })
               .attr("y", 18)
-              .attr("width", function(d,i) { return (w/buttonCount)-20; })
+              .attr("width", function(d,i) { return (w/bCnt)-20; })
               .attr("height", 20)
               .attr("text-anchor", "middle");
+
       }
       
       function showInfo(data, showPara){
@@ -231,28 +259,31 @@
         return s(val);
       }
 
-
-      var sortBars = function(posArray,svg,sortmode) {
+      var sortBars = function(posArray,svg,buttonState) {
         curWidth = 0;
 
-       if(sortmode  == 0){
+        if(buttonState == 1) {
           posArray.sort(function(a,b) { 
-            return a.width - b.width 
-          });        
-       } else if(sortmode == 1) {
+            return a.width - b.width;
+          });  
+        } else if(buttonState == -1){
           posArray.sort(function(a,b) { 
-            return b.width - a.width 
-          });
-        } else if(sortmode == 2) {
+            return b.width - a.width;
+          });            
+        } else if(buttonState == 2) {
           posArray.sort(function(a,b) { 
-            return a.width - b.width 
-          });
+            return a.id - b.id;
+          });                      
+        } else if(buttonState == -2) {
+            posArray.sort(function(a,b) { 
+            return b.id - a.id; 
+          });            
         }
+
         posArray.forEach(function(d,i) {
-          var w_tmp = posArray[i].width
+          var w_tmp = posArray[i].width;
           posArray[i].x = curWidth;
           curWidth += w_tmp;
-
           svg.select("#r"+(posArray[i].id))
              .transition()
              .duration(1000)
@@ -260,6 +291,16 @@
                 return posArray[i].x;
               });
         });
+      }
+
+      function changeMarkerState(marker,buttonState,buttonID) {
+        if(buttonState < 0) {
+          console.log(buttonID);
+          marker.select("#m"+buttonID)
+                .transition()
+                .duration(300)
+                .attr('transform', 'translate(' + 10 + ',' + 100 + ')')
+        }
       }
 
     </script>
