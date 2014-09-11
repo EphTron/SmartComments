@@ -182,6 +182,16 @@
         var bCnt = buttArray.length; // buttonCount
         clickState=[0,0,0,0,0];
 
+        pointer.attr("id", function(d,i) { return "p"+i })
+               .style("fill", "white")
+               .style("stroke", "white")
+               .attr("points", function(d,i) {
+                 var width = findByID(posArray,i).width;
+                 var x = findByID(posArray,i).x;
+                 var x1 = x+(width/2);
+                 return (x1+","+50+","+(x1-5)+","+60+","+(x1+5)+","+60);
+               });
+
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
@@ -199,7 +209,13 @@
               var getRectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
               var rectX = getRectX;
               var showPara = 1;
+              // showPointer(barSVG,id);
               showInfo(d,textBox,showPara,rectX);
+              
+              barSVG.select("#p"+parseInt(d.id))
+                    .style("fill", "gold")
+                    .style("stroke", "gold");
+
             })
             .on("mouseout",function (d) {
               barSVG.select("#r"+parseInt(d.id))
@@ -208,16 +224,11 @@
                  .attr("fill", colScl(d.helpAvg));
               var showPara = 0;
               showInfo(d,showPara);
-            });
 
-        marker.attr("id", function(d,i) { return "m"+i; })
-              .style("stroke", "black")
-              .style("fill", "black")
-              .attr("points", function(d,i) {
-                  return (i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
-                         (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
-                         (i*(w/bCnt)+(w/bCnt)-30)+","+13;
-               });
+              barSVG.select("#p"+parseInt(d.id))
+                    .style("fill", "white")
+                    .style("stroke", "white");
+            });
 
         buttons.attr("id", function(d,i) { return "b"+i; })
                .attr("x", function(d,i) { return i*(w/bCnt); })
@@ -246,31 +257,28 @@
               .style("stroke", "black")
               .style("fill", "black")
               .attr("points", function(d,i) {
-                  return (i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
-                         (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
-                         (i*(w/bCnt)+(w/bCnt)-30)+","+13;
+                  return ((i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
+                          (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
+                          (i*(w/bCnt)+(w/bCnt)-30)+","+13);
                });
       }
       
       function showInfo(data, textBox, showPara, rectX){
 
-        if (showPara == 1){
-        
-        d3.select(".textNr")
-          .text("Nr.:" + data.id);
-        d3.select(".textNr")
-          .text("Nr.:" + data.id);
-          
-        d3.select(".textInfo")
-          .text("Sterne: "+ data.rating + "\n" + data.infoText);
-        textStyle(textBox,rectX);
+        if (showPara == 1){        
+          d3.select(".textNr")
+            .text("Nr.:" + data.id);
+          d3.select(".textNr")
+            .text("Nr.:" + data.id);
+          d3.select(".textInfo")
+            .text("Sterne: "+ data.rating + "\n" + data.infoText);
+          textStyle(textBox,rectX);
         } 
         else if(showPara == 0){
-        d3.select(".textNr")
-          .text("");
-
-        d3.select(".textInfo")
-          .text("");
+          d3.select(".textNr")
+            .text("");
+          d3.select(".textInfo")
+            .text("");
         }
       }
       
@@ -357,6 +365,12 @@
           svg.select("#m"+buttonID)
              .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");          
         }
+      }
+
+      function findByID(src,id) {
+        return src.filter( function(obj) { 
+          return +obj.id == id;
+        })[0];
       }
 
     </script>
