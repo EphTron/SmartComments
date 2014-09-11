@@ -14,7 +14,7 @@
   <body>
     <div class="wrapper">
       <div class="main">
-        
+
         <section class="page1">
         <div class="productFrame">
             <h1>Product</h1>
@@ -30,7 +30,7 @@
             </div>
         </div>
         </section>
-          
+
         <section class="page2">
           <div class="smartComments">
               <h4>Kundenrezensionen</h4>
@@ -48,9 +48,9 @@
         </section>
       </div>
     </div>
-    
+
     <script type="text/javascript">
-    
+
       var w = 1100;
       var h = 50;
       var lastID = -1;
@@ -62,14 +62,14 @@
       var posArray = [];
       var sortMode = 0;
       var clicked = 1;
-      
+
       var dataset;
       d3.csv("bag.csv", function(error,data){
         if(error) {
           console.log(error);
         } else {
           dataset = data;
-          
+
           dataset.forEach(function(d) {
             d["helpNeg"] = (d.helpAll - d.helpPos);
             d["helpAvg"] = (d.helpPos - d.helpNeg);
@@ -81,11 +81,11 @@
           maxHelpAvg = d3.max(data,function(d) {
             return parseInt(d.helpAvg)
           });
-          
+
           dataset.forEach(function(d) {
             totalWidth += mapTo(d.helpAvg);
           });
-          
+
           var w_tmp = 0;
           dataset.forEach(function(d) {
             w_tmp += mapToScreen(d.helpAvg);
@@ -96,12 +96,12 @@
           }else if (w_tmp < w){
             correct = (w_tmp - w);
           }
-          
+
           dataset.forEach(function(d,i) {
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
           });
-          
+
           var buttonData = [];
           buttonData = setup(data);
 
@@ -151,6 +151,7 @@
                               .enter()
                               .append("text");
 
+        //marker setup
         var marker = buttonSVG.selectAll("polygon")
                               .data(buttArray)
                               .enter()
@@ -171,10 +172,9 @@
         var marker    = buttonData[6];
         var textBox   = buttonData[7];
         var colScl    = buttonData[8];
-        
+
         var bCnt = buttArray.length; // buttonCount
         clickState=[0,0,0,0,0];
-            
 
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
@@ -193,7 +193,7 @@
               var showPara = 0;
               showInfo(d,showPara);
             });
-        
+
         marker.attr("id", function(d,i) { return "m"+i; })
               .style("stroke", "black")
               .style("fill", "black")
@@ -211,7 +211,7 @@
                .attr("rx", 12)
                .attr("ry", 12)
                .attr("fill", "lightgrey")
-               .on("click", function(d) { 
+               .on("click", function(d) {
                   clicked = clicked*-1;
                   var buttonState = clicked*d.value;
                   sortBars(posArray,barSVG,buttonState);
@@ -227,31 +227,31 @@
               .attr("text-anchor", "middle");
 
       }
-      
+
       function showInfo(data, showPara){
         if (showPara == 1){
         d3.select(".textNr")
           .text("Kundenrezension Nr.:" + data.id + " von " + data.name + " X: ");
-          
+
         d3.select(".textInfo")
           .text("Sterne: "+ data.rating + "\n" + data.infoText);
-        } 
+        }
         else if(showPara == 0){
         d3.select(".textNr")
           .text("");
-          
+
         d3.select(".textInfo")
           .text("");
         }
       }
-      
+
       function mapToScreen(val) {
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
 								  .range([1,w-correct]);
         return m(mapTo(val));
       }
-      
+
       function mapTo(val) {
         var s = d3.scale.linear()
                   .domain([minHelpAvg,maxHelpAvg])
@@ -263,21 +263,21 @@
         curWidth = 0;
 
         if(buttonState == 1) {
-          posArray.sort(function(a,b) { 
+          posArray.sort(function(a,b) {
             return a.width - b.width;
-          });  
+          });
         } else if(buttonState == -1){
-          posArray.sort(function(a,b) { 
+          posArray.sort(function(a,b) {
             return b.width - a.width;
-          });            
+          });
         } else if(buttonState == 2) {
-          posArray.sort(function(a,b) { 
+          posArray.sort(function(a,b) {
             return a.id - b.id;
-          });                      
+          });
         } else if(buttonState == -2) {
-            posArray.sort(function(a,b) { 
-            return b.id - a.id; 
-          });            
+            posArray.sort(function(a,b) {
+            return b.id - a.id;
+          });
         }
 
         posArray.forEach(function(d,i) {
@@ -296,10 +296,12 @@
       function changeMarkerState(svg,marker,buttonState,buttonID) {
         if(buttonState < 0) {
           console.log(buttonID);
+          // svg.select("#m"+buttonID).attr("points", )
           svg.select("#m"+buttonID)
              .transition()
              .duration(300)
-             .attr("transform", "rotate(90,"+100+","+10+")"); 
+             .attr("transform", "rotate("+90+")");
+             //.attr("transform", "rotate(90,"+100+","+10+")");
         }
       }
 
