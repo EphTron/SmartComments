@@ -294,14 +294,21 @@
       }
 
       function changeMarkerState(svg,marker,buttonState,buttonID) {
-        if(buttonState < 0) {
-          console.log(buttonID);
-          // svg.select("#m"+buttonID).attr("points", )
+        console.log(buttonID);
+        var points = svg.select("#m"+buttonID).attr("points");
+        var pntArray = points.split(",").map(Number);
+        
+        if(buttonState > 0) {
           svg.select("#m"+buttonID)
              .transition()
-             .duration(300)
-             .attr("transform", "rotate("+90+")");
+             .duration(800)
+             .attr("transform", "rotate("+180+","+(pntArray[0]+5) +","+pntArray[5]+")");
              //.attr("transform", "rotate(90,"+100+","+10+")");
+        } else if (buttonState < 0) {
+          svg.select("#m"+buttonID)
+             .transition()
+             .duration(800)
+             .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");          
         }
       }
 
