@@ -5,8 +5,8 @@
       <link rel="stylesheet" href="indexstyle.css">
       <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
       <script type="text/javascript" src="d3/d3.v3.js"></script>
-      <!-- <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script> -->
-      <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+      <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script>
+      <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
       <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
 
       <meta charset="UTF-8">
@@ -14,7 +14,7 @@
   <body>
     <div class="wrapper">
       <div class="main">
-        
+
         <section class="page1">
         <div class="productFrame">
             <h1>Product</h1>
@@ -30,11 +30,11 @@
             </div>
         </div>
         </section>
-          
+
         <section class="page2">
           <div class="smartComments">
               <h4>Kundenrezensionen</h4>
-              <div class="sortButtons"  unselectable="yes" onselectstart="return false">
+              <div class="sortButtons" unselectable="yes" onselectstart="return false">
               </div>
               <div class="barChart">
               </div>
@@ -50,12 +50,11 @@
         </section>
       </div>
     </div>
-    
+
     <script type="text/javascript">
-    
+ 
       var w = window.innerWidth - 50;
       var h = 50;
-      var clickcounter = 0;
       var lastID = -1;
       var minHelpAvg = 0;
       var maxHelpAvg = 0;
@@ -72,7 +71,7 @@
           console.log(error);
         } else {
           dataset = data;
-          
+
           dataset.forEach(function(d) {
             d["helpNeg"] = (d.helpAll - d.helpPos);
             d["helpAvg"] = (d.helpPos - d.helpNeg);
@@ -84,11 +83,11 @@
           maxHelpAvg = d3.max(data,function(d) {
             return parseInt(d.helpAvg)
           });
-          
+
           dataset.forEach(function(d) {
             totalWidth += mapTo(d.helpAvg);
           });
-          
+
           var w_tmp = 0;
           dataset.forEach(function(d) {
             w_tmp += mapToScreen(d.helpAvg);
@@ -99,12 +98,11 @@
           }else if (w_tmp < w){
             correct = (w_tmp - w);
           }
-          
+
           dataset.forEach(function(d,i) {
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
           });
-          
           var setupData = [];
           setupData = setup(data);
 
@@ -113,7 +111,6 @@
       });
 
       function setup(data) {
-        
         //bar setup
         var barSVG = d3.select(".barChart")
                     .append("svg")
@@ -131,6 +128,7 @@
         var colorScale = d3.scale.linear()
                            .domain([minHelpAvg,0,maxHelpAvg])
                            .range(["red","lightgray","green"]);
+
         //button setup
         var buttArray = [{id:0 ,state:"helpful", value:1},
                          {id:1 ,state:"number",  value:2},
@@ -174,10 +172,10 @@
         var marker    = setupData[6];
         var textBox   = setupData[7];
         var colScl    = setupData[8];
-        
+
         var bCnt = buttArray.length; // buttonCount
         clickState=[0,0,0,0,0];
-                
+
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
@@ -205,7 +203,16 @@
               var showPara = 0;
               showInfo(d,showPara);
             });
-        
+
+        marker.attr("id", function(d,i) { return "m"+i; })
+              .style("stroke", "black")
+              .style("fill", "black")
+              .attr("points", function(d,i) {
+                  return (i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
+                         (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
+                         (i*(w/bCnt)+(w/bCnt)-30)+","+13;
+               });
+
         buttons.attr("id", function(d,i) { return "b"+i; })
                .attr("x", function(d,i) { return i*(w/bCnt); })
                .attr("y", 0)
@@ -240,6 +247,7 @@
       }
       
       function showInfo(data, textBox, showPara, rectX){
+
         if (showPara == 1){
         
         d3.select(".textNr")
@@ -254,7 +262,7 @@
         else if(showPara == 0){
         d3.select(".textNr")
           .text("");
-          
+
         d3.select(".textInfo")
           .text("");
         }
@@ -288,7 +296,7 @@
 								  .range([1,w-correct]);
         return m(mapTo(val));
       }
-      
+
       function mapTo(val) {
         var s = d3.scale.linear()
                   .domain([minHelpAvg,maxHelpAvg])
@@ -296,11 +304,10 @@
         return s(val);
       }
 
-
-      function sortBars(posArray,svg,sortmode) {
+      var sortBars = function(posArray,svg,buttonState) {
         curWidth = 0;
 
-       if(buttonState == 1) {
+        if(buttonState == 1) {
           posArray.sort(function(a,b) {
             return a.width - b.width;
           });
@@ -317,8 +324,21 @@
             return b.id - a.id;
           });
         }
+
+
+        posArray.forEach(function(d,i) {
+          var w_tmp = posArray[i].width;
+          posArray[i].x = curWidth;
+          curWidth += w_tmp;
+          svg.select("#r"+(posArray[i].id))
+             .transition()
+             .duration(1000)
+             .attr("x", function(d) {
+                return posArray[i].x;
+              });
+        });
       }
-        
+
       function changeMarkerState(svg,marker,buttonState,buttonID) {
         console.log(buttonID);
         var points = svg.select("#m"+buttonID).attr("points");
@@ -326,14 +346,14 @@
         
         if(buttonState > 0) {
           svg.select("#m"+buttonID)
-             // .transition()
-             // .duration(100)
+             .transition()
+             .duration(800)
              .attr("transform", "rotate("+180+","+(pntArray[0]+5) +","+pntArray[5]+")");
              //.attr("transform", "rotate(90,"+100+","+10+")");
         } else if (buttonState < 0) {
           svg.select("#m"+buttonID)
-             // .transition()
-             // .duration(100)
+             .transition()
+             .duration(800)
              .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");          
         }
       }
