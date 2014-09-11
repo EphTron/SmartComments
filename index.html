@@ -172,7 +172,7 @@
         var textBox   = buttonData[7];
         var colScl    = buttonData[8];
         
-        var bCnt = buttArray.length;
+        var bCnt = buttArray.length; // buttonCount
         clickState=[0,0,0,0,0];
             
 
@@ -215,7 +215,7 @@
                   clicked = clicked*-1;
                   var buttonState = clicked*d.value;
                   sortBars(posArray,barSVG,buttonState);
-                  changeMarkerState(marker,buttonState,d.id);
+                  changeMarkerState(buttonSVG,marker,buttonState,d.id);
                 });
 
         labels.attr("id", function(d,i) { return "l"; })
@@ -293,13 +293,13 @@
         });
       }
 
-      function changeMarkerState(marker,buttonState,buttonID) {
+      function changeMarkerState(svg,marker,buttonState,buttonID) {
         if(buttonState < 0) {
           console.log(buttonID);
-          marker.select("#m"+buttonID)
-                .transition()
-                .duration(300)
-                .attr('transform', 'translate(' + 10 + ',' + 100 + ')')
+          svg.select("#m"+buttonID)
+             .transition()
+             .duration(300)
+             .attr("transform", "rotate(90,"+100+","+10+")"); 
         }
       }
 
