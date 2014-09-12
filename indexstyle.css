@@ -65,11 +65,7 @@ body {
     -ms-user-select: none;
     user-select: none;
 }
-<<<<<<< HEAD
 
-=======
- 
->>>>>>> 038f77d95562c553c5c0f0eb11d8ce616cc3723e
 .barChart{
   height: 60px;
   background-color: white;
@@ -79,6 +75,13 @@ body {
   margin-left: 25px;
   width: 800px;
   height: 300px;
-  background-image: linear-gradient(#6600FF 0%, white 100%);
-  /* //#9FBFD2 100%); */
+  background-image: linear-gradient(lightgray 0%, white 100%);
+  border-width: 3px; 
+  border-style: solid; 
+  -webkit-border-image: -webkit-gradient(linear, 102, 204, 255, 100%, to(rgba(255, 255, 255, 0))) 1 100%; 
+  -webkit-border-image: -webkit-linear-gradient(rgba(102,204,255, 0), white ) 1 100%; 
+  -moz-border-image: -moz-linear-gradient(white, rgba(102, 204, 255, 0)) 1 100%; 
+  -o-border-image: -o-linear-gradient(rgba(102, 204, 255, 0), white) 1 100%; 
+  border-image: linear-gradient(to bottom, rgba(102, 204, 255, 0), white) 1 100%;
+  /* //#66CCFF 100%); */
 }

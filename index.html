@@ -5,6 +5,7 @@
       <link rel="stylesheet" href="indexstyle.css">
       <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
       <script type="text/javascript" src="d3/d3.v3.js"></script>
+      <script type="text/javascript" src="d3/fisheye.js"></script>
       <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script>
       <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
       <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
@@ -65,8 +66,9 @@
       var sortMode = 0;
       var clicked = 1;
 
+
       var dataset;
-      d3.csv("bag.csv", function(error,data){
+      d3.csv("tent2.csv", function(error,data){
         if(error) {
           console.log(error);
         } else {
@@ -158,6 +160,7 @@
                               .data(buttArray)
                               .enter()
                               .append("polygon");
+        setupFish();
 
         var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer];
         return values;
@@ -182,13 +185,6 @@
         pointer.attr("id", "p")
                .style("fill", "white")
                .style("stroke", "white");
-               
-               // .attr("points", function(d,i) {
-               //   var width = findByID(posArray,i).width;
-               //   var x = findByID(posArray,i).x;
-               //   var x1 = x+(width/2);
-               //   return (x1+","+50+","+(x1-5)+","+60+","+(x1+5)+","+60);
-               // });
 
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
@@ -200,10 +196,29 @@
               return colScl(d.helpAvg);
             })
             .on("mouseover",  function(d,i) {
+              var mouse = d3.mouse(this);
+              fisheyeScale.distortion(3).focus(mouse[0]);
               barSVG.select("#r"+parseInt(d.id))
                     .transition()
-                    .duration(150)
-                    .attr("fill", "gold");
+                    .duration(100)
+                    .attr("fill", "#66CCFF");
+                    
+              curWidth = 0;
+              posArray.forEach(function(d,i) {
+                var w_tmp = fisheyeScale(posArray[i].width);
+                d3.select("#r"+(posArray[i].id))
+                  .transition()
+                  .duration(50)
+                  .attr("x", function(d) { return curWidth; })
+                  .attr("width", function(d) {
+                   
+                    return fishScl(d.helpAvg);
+                  });
+                curWidth += w_tmp;
+                //console.log(d3.select("#r"+(posArray[i].id)));
+              });
+                
+              
 
               var getRectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
               var rectX = getRectX;
@@ -216,9 +231,9 @@
 
               barSVG.select("#p")
                     .transition()
-                    .duration(180)
-                    .style("fill", "gold")
-                    .style("stroke", "gold")
+                    .duration(100)
+                    .style("fill", "#66CCFF")
+                    .style("stroke", "#66CCFF")
                     .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
             })
             .on("mouseout",function (d) {
@@ -232,7 +247,7 @@
 
               barSVG.select("#p")
                     .transition()
-                    .duration(180)
+                    .duration(50)
                     .style("fill", "white")
                     .style("stroke", "white");
             });
@@ -284,7 +299,7 @@
                   return ((i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
                           (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
                           (i*(w/bCnt)+(w/bCnt)-30)+","+13);
-               });
+              });
       }
 
       function showInfo(data, textBox, showPara, rectX){

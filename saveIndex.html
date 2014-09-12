@@ -1,76 +1,83 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Visu Beleg</title>
-    <link rel="stylesheet" href="indexstyle.css">
-    <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
-    <script type="text/javascript" src="d3/d3.v3.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
+  <head>
+      <title>Visu Beleg</title>
+      <link rel="stylesheet" href="indexstyle.css">
+      <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
+      <script type="text/javascript" src="d3/d3.v3.js"></script>
+      <script type="text/javascript" src="d3/fisheye.js"></script>
+      <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script>
+      <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
+      <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
 
-    <meta charset="UTF-8">
-    </head>
-    <body>
-		<div class="wrapper">
-			<div class="main">
-				
-				<section class="page1">
-				<div class="mainFrame">
-						<h1>Product</h1>
-						<div class="productPicture">
-							<img src="./pictures/bag.png" alt="Picture Bag">
-						</div>
-						<div class="productInfo">
-							<h4>MUMIENSCHLAFSACK LIGHT 600 4651</h4>
-							<p>von Unbekannt</p>
-							<p><img src="./pictures/stars.png" alt="Picture Stars"> 84 Kundenrezensionen</p>
-							<p>Preis:  17,90</p>
-							<p>AUF LAGER</p>
-						</div>
-				</div>
-				</section>
-					
-				<section class="page2">
-				  <div class="smartComments">
-							<h4>Kundenrezensionen</h4>
-							<div class="sortButtons">
-							</div>
-							<div class="barChart">
-							</div>
-							<div class="textBox">
-								<p class="textNummer"></p>
-								<p class="textTitle"></p>
-								<p class="textInfo"></p>
-								
-							</div>
-				  </div>
-				</section>
-			</div>
-		</div>
-		
-		<script type="text/javascript">
-			  
-			var w = 1100;
-			var h = 50;
-			var clickcounter = 0;
-			var lastID = -1;
+      <meta charset="UTF-8">
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="main">
+
+        <section class="page1">
+        <div class="productFrame">
+            <h1>Product</h1>
+            <div class="productPicture">
+              <img src="./pictures/bag.png" alt="Picture Bag">
+            </div>
+            <div class="productInfo">
+              <h4>MUMIENSCHLAFSACK LIGHT 600 4651</h4>
+              <p>von Unbekannt</p>
+              <p><img src="./pictures/stars.png" alt="Picture Stars"> 84 Kundenrezensionen</p>
+              <p>Preis:  17,90</p>
+              <p>AUF LAGER</p>
+            </div>
+        </div>
+        </section>
+
+        <section class="page2">
+          <div class="smartComments">
+              <h4>Kundenrezensionen</h4>
+              <div class="sortButtons" unselectable="yes" onselectstart="return false">
+              </div>
+              <div class="barChart">
+              </div>
+              <div class="textBox">
+                <div class="textNr"></div>
+                <div class="textAuthor"></div>
+                <div class="textStars"></div>
+                <div class="textTitle"></div>
+                <div class="textInfo"></div>
+                <div class="textHelp"></div>
+              </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+      var w = window.innerWidth - 50;
+      var h = 50;
+      var lastID = -1;
       var minHelpAvg = 0;
       var maxHelpAvg = 0;
       var totalWidth = 0;
       var curWidth = 0;
       var correct = 0;
-      
-			var dataset;
-			d3.csv("bag.csv", function(error,data){
-				if(error) {
-					console.log(error);
-				} else {
-					dataset = data;
-					
-					dataset.forEach(function(d) {
-						d["helpNeg"] = (d.helpAll - d.helpPos);
-						d["helpAvg"] = (d.helpPos - d.helpNeg);
-					});
+      var posArray = [];
+      var sortMode = 0;
+      var clicked = 1;
+
+
+      var dataset;
+      d3.csv("tent2.csv", function(error,data){
+        if(error) {
+          console.log(error);
+        } else {
+          dataset = data;
+
+          dataset.forEach(function(d) {
+            d["helpNeg"] = (d.helpAll - d.helpPos);
+            d["helpAvg"] = (d.helpPos - d.helpNeg);
+          });
 
           minHelpAvg = d3.min(data,function(d) {
             return parseInt(d.helpAvg);
@@ -78,113 +85,354 @@
           maxHelpAvg = d3.max(data,function(d) {
             return parseInt(d.helpAvg)
           });
-          
-          var posArray = [];
+
           dataset.forEach(function(d) {
-            totalWidth +=  parseInt(mapTo(d.helpAvg));
+            totalWidth += mapTo(d.helpAvg);
           });
-          
+
           var w_tmp = 0;
           dataset.forEach(function(d) {
             w_tmp += mapToScreen(d.helpAvg);
           });
-          if (w_tmp > w){
-            correct = (w_tmp - w) + 60;
-          }else if (w_tmp < w){
-            correct = (w_tmp - w) - 50;
-          }
-          
-          dataset.forEach(function(d,i) {
-            curWidth += posArray[i].width;
-            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
-					});
-          
-					drawBarChart(dataset,posArray);
-				}
-			});
 
-      
-			function drawBarChart(data,posArray) {
-        
-        var svg = d3.select(".barChart")
+          if (w_tmp > w){
+            correct = (w_tmp - w);
+          }else if (w_tmp < w){
+            correct = (w_tmp - w);
+          }
+
+          dataset.forEach(function(d,i) {
+            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
+            curWidth += mapToScreen(d.helpAvg);
+          });
+          var setupData = [];
+          setupData = setup(data);
+
+          draw(dataset,posArray,setupData);
+        }
+      });
+
+      function setup(data) {
+        //bar setup
+        var barSVG = d3.select(".barChart")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h + 10);
-							
-				var bars = svg.selectAll("rect")
-                      .data(data)
-                      .enter()
-                      .append("rect");
-                      
+
+        var bars = barSVG.selectAll("rect")
+                         .data(data)
+                         .enter()
+                         .append("rect");
+
+        var pointer = barSVG.append("polygon");
+
         var textBox = d3.select(".smartComments")
-				                .select(".textBox")
-        
-				var colScl = d3.scale.linear()
-								  .domain([minHelpAvg,0,maxHelpAvg])
-								  .range(["red","lightgray","green"]);
-								
-				bars.attr("id", function(d,i) { return "r" + i; })
+                        .select(".textBox")
+
+        var colorScale = d3.scale.linear()
+                           .domain([minHelpAvg,0,maxHelpAvg])
+                           .range(["red","lightgray","green"]);
+
+        //button setup
+        var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
+                         {id:1 ,state:"sort by: number",  value:2},
+                         {id:2 ,state:"none",    value:3},
+                         {id:3 ,state:"none",    value:4},
+                         {id:4 ,state:"none",    value:5}];
+
+        var buttonSVG = d3.select(".sortButtons")
+                          .append("svg")
+                          .attr("width", w)
+                          .attr("height", 30);
+
+        var buttons = buttonSVG.selectAll("rect")
+                               .data(buttArray)
+                               .enter()
+                               .append("rect");
+
+        var labels = buttonSVG.selectAll("text")
+                              .data(buttArray)
+                              .enter()
+                              .append("text");
+
+        //marker setup
+        var marker = buttonSVG.selectAll("polygon")
+                              .data(buttArray)
+                              .enter()
+                              .append("polygon");
+        setupFish();
+
+        var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer];
+        return values;
+      }
+
+      function draw(data,posArray,setupData) {
+
+        var buttonSVG = setupData[0];
+        var barSVG    = setupData[1];
+        var bars      = setupData[2];
+        var buttons   = setupData[3];
+        var labels    = setupData[4];
+        var buttArray = setupData[5];
+        var marker    = setupData[6];
+        var textBox   = setupData[7];
+        var colScl    = setupData[8];
+        var pointer   = setupData[9];
+
+        var bCnt = buttArray.length; // buttonCount
+        clickState=[0,0,0,0,0];
+
+        pointer.attr("id", "p")
+               .style("fill", "white")
+               .style("stroke", "white");
+               
+               // .attr("points", function(d,i) {
+               //   var width = findByID(posArray,i).width;
+               //   var x = findByID(posArray,i).x;
+               //   var x1 = x+(width/2);
+               //   return (x1+","+50+","+(x1-5)+","+60+","+(x1+5)+","+60);
+               // });
+
+        bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
-				    .attr("width", function(d,i) { return posArray[i].width })
+            .attr("width", function(d,i) { return posArray[i].width })
             .attr("height", h)
+            .attr("stroke", "white")
             .attr("fill", function(d) {
-					    return colScl(parseInt(d.helpAvg));
+              return colScl(d.helpAvg);
             })
             .on("mouseover",  function(d,i) {
+              var mouse = d3.mouse(this);
+              fisheyeScale.distortion(3).focus(mouse[0]);
+              barSVG.select("#r"+parseInt(d.id))
+                    .transition()
+                    .duration(100)
+                    .attr("fill", "#66CCFF");
+                    
+              curWidth = 0;
+              posArray.forEach(function(d,i) {
+                var w_tmp = fisheyeScale(posArray[i].width);
+                d3.select("#r"+(posArray[i].id))
+                  .transition()
+                  .duration(50)
+                  .attr("x", function(d) { return curWidth; })
+                  .attr("width", function(d) {
+                   
+                    return fishScl(d.helpAvg);
+                  });
+                curWidth += w_tmp;
+                //console.log(d3.select("#r"+(posArray[i].id)));
+              });
+                
+              
+
+              var getRectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
+              var rectX = getRectX;
               var showPara = 1;
-              showInfo(d,showPara);
+              showInfo(d,textBox,showPara,rectX);
+
+              var width = findByID(posArray,i).width;
+              var x = findByID(posArray,i).x;
+              var x1 = x+(width/2);
+
+              barSVG.select("#p")
+                    .transition()
+                    .duration(100)
+                    .style("fill", "#66CCFF")
+                    .style("stroke", "#66CCFF")
+                    .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
             })
             .on("mouseout",function (d) {
+              barSVG.select("#r"+parseInt(d.id))
+                 .transition()
+                 .duration(150)
+                 .attr("fill", colScl(d.helpAvg));
               var showPara = 0;
               showInfo(d,showPara);
+
+
+              barSVG.select("#p")
+                    .transition()
+                    .duration(50)
+                    .style("fill", "white")
+                    .style("stroke", "white");
             });
-			}
-			
-			function showInfo(data, showPara){
-				if (showPara == 1){
-				d3.select(".textNr")
-				  .text("Kundenrezension Nr.:" + data.id + " von " + data.name );
-				  
-				d3.select(".textInfo")
-				  .text("Sterne: "+ data.rating + "\n" + data.infoText);
-				} 
-				else if(showPara == 0){
-				d3.select(".textNr")
-				  .text("");
-				  
-				d3.select(".textInfo")
-				  .text("");
-				}
-			}
-      
+
+        buttons.attr("id", function(d,i) { return "b"+i; })
+               .attr("active", false)
+               .attr("x", function(d,i) { return i*(w/bCnt); })
+               .attr("y", 0)
+               .attr("width", function(d,i) { return (w/bCnt)-20; })
+               .attr("height", 25)
+               .attr("rx", 12)
+               .attr("ry", 12)
+               .attr("fill", "lightgrey")
+               .on("mouseover", function(d){
+                  buttonSVG.select("#b"+parseInt(d.id))
+                    .transition()
+                    .duration(100)
+                    .attr("fill", "lightblue");
+                })
+               .on("mouseout", function(d){
+                  buttonSVG.select("#b"+parseInt(d.id))
+                    .transition()
+                    .duration(100)
+                    .attr("fill", "lightgrey");
+                })
+               .on("click", function(d) {
+                  buttonSVG.select("#b"+parseInt(d.id))
+                    .transition()
+                    .duration(100)
+                    .attr("fill", "lightblue")
+                  clicked = clicked*-1;
+                  var buttonState = clicked*d.value;
+                  sortBars(posArray,barSVG,buttonState);
+                  changeMarkerState(buttonSVG,marker,buttonState,d.id);
+                });
+
+        labels.attr("id", function(d,i) { return "l"; })
+              .text(function(d,i) { return "sort by: " + buttArray[i].state; })
+              .attr("x", function(d,i) { return i*(w/bCnt) + ((w/bCnt)/2-10);  })
+              .attr("y", 18)
+              .attr("width", function(d,i) { return (w/bCnt)-20; })
+              .attr("height", 20)
+              .attr("text-anchor", "middle");
+
+        marker.attr("id", function(d,i) { return "m"+i; })
+              .style("stroke", "black")
+              .style("fill", "black")
+              .attr("points", function(d,i) {
+                  return ((i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
+                          (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
+                          (i*(w/bCnt)+(w/bCnt)-30)+","+13);
+               });
+      }
+
+      function showInfo(data, textBox, showPara, rectX){
+
+        if (showPara == 1){
+          d3.select(".textNr")
+            .text("Nr.:" + data.id);
+          d3.select(".textNr")
+            .text("Nr.:" + data.id);
+          d3.select(".textInfo")
+            .text("Sterne: "+ data.rating + "\n" + data.infoText);
+          textStyle(textBox,rectX);
+        }
+        else if(showPara == 0){
+          d3.select(".textNr")
+            .text("");
+          d3.select(".textInfo")
+            .text("");
+        }
+      }
+
+      function textStyle(textBox, rectX) {
+        if(rectX < 400) {
+          textBox.transition()
+            .duration(180)
+            .style("width", "800px")
+            .style("height", "200px")
+            .style("margin-left", 25+"px");
+        } else if (rectX > (w-400)) {
+          textBox.transition()
+            .duration(180)
+            .style("width", "800px")
+            .style("height", "200px")
+            .style("margin-left", (w-800+25)+"px");
+        } else {
+          textBox.transition()
+            .duration(180)
+            .style("width", "800px")
+            .style("height", "200px")
+            .style("margin-left", (rectX-400+25)+"px");
+        }
+      };
+
       function mapToScreen(val) {
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
 								  .range([1,w-correct]);
-                  console.log(w-correct);
-        return parseInt(m(mapTo(val)));
+        return m(mapTo(val));
       }
-      
+
       function mapTo(val) {
         var s = d3.scale.linear()
                   .domain([minHelpAvg,maxHelpAvg])
                   .range([1,10]);
-        return parseInt(s(val));
+        return s(val);
+      }
+      
+      function fishScl(val) {
+        return fisheyeScale(mapTo(val));
+      }
+      
+      function setupFish(){
+        fisheyeScale = d3.fisheye
+                         .scale(d3.scale.linear)
+                         .domain([0,totalWidth])
+                         .range([1,w-correct]);
       }
 
-			function calcX(d,i,scale,svg) {
-				if(i == 0) {
-					return 0;
-				} else {
-					var wold = mapToScreen(posArray[i-1].width);
-					var xold = svg.select("#r"+(i-1)).attr('x');
-					return parseFloat(xold) + wold; 
-				}
-			}
+      var sortBars = function(posArray,svg,buttonState) {
+        curWidth = 0;
 
-		</script>
-		<script>
+        if(buttonState == 1) {
+          posArray.sort(function(a,b) {
+            return a.width - b.width;
+          });
+        } else if(buttonState == -1){
+          posArray.sort(function(a,b) {
+            return b.width - a.width;
+          });
+        } else if(buttonState == 2) {
+          posArray.sort(function(a,b) {
+            return a.id - b.id;
+          });
+        } else if(buttonState == -2) {
+            posArray.sort(function(a,b) {
+            return b.id - a.id;
+          });
+        }
+
+
+        posArray.forEach(function(d,i) {
+          var w_tmp = posArray[i].width;
+          posArray[i].x = curWidth;
+          curWidth += w_tmp;
+          svg.select("#r"+(posArray[i].id))
+             .transition()
+             .duration(1000)
+             .attr("x", function(d) {
+                return posArray[i].x;
+              });
+        });
+      }
+
+      function changeMarkerState(svg,marker,buttonState,buttonID) {
+        console.log(buttonID);
+        var points = svg.select("#m"+buttonID).attr("points");
+        var pntArray = points.split(",").map(Number);
+
+        if(buttonState > 0) {
+          svg.select("#m"+buttonID)
+             .attr("transform", "rotate("+180+","+(pntArray[0]+5) +","+pntArray[5]+")");
+        } else if (buttonState < 0) {
+          svg.select("#m"+buttonID)
+             .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");
+        }
+      }
+
+      function findByID(src,id) {
+        return src.filter( function(obj) {
+          return +obj.id == id;
+        })[0];
+      }
+
+    </script>
+
+    <script>
 		  $(document).ready(function(){
 			  $(".main").onepage_scroll({
 				sectionContainer: "section",
@@ -193,5 +441,5 @@
 				});
 		  });
 		</script>
-    </body>
+  </body>
 </html>
