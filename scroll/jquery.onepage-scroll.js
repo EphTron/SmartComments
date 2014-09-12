@@ -19,7 +19,7 @@
   var defaults = {
     sectionContainer: "section",
     easing: "ease",
-    animationTime: 1000,
+    animationTime: 800,
     pagination: true,
     updateURL: false,
     keyboard: true,
@@ -309,13 +309,13 @@
       }
     });
 
-    el.swipeEvents().bind("swipeDown",  function(event){
-      if (!$("body").hasClass("disabled-onepage-scroll")) event.preventDefault();
-      el.moveUp();
-    }).bind("swipeUp", function(event){
-      if (!$("body").hasClass("disabled-onepage-scroll")) event.preventDefault();
-      el.moveDown();
-    });
+    // el.swipeEvents().bind("swipeDown",  function(event){
+    //   if (!$("body").hasClass("disabled-onepage-scroll")) event.preventDefault();
+    //   el.moveUp();
+    // }).bind("swipeUp", function(event){
+    //   if (!$("body").hasClass("disabled-onepage-scroll")) event.preventDefault();
+    //   el.moveDown();
+    // });
 
     // Create Pagination and Display Them
     if (settings.pagination == true) {

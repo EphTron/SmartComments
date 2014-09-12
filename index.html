@@ -3,11 +3,9 @@
   <head>
       <title>Visu Beleg</title>
       <link rel="stylesheet" href="indexstyle.css">
-      <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
       <script type="text/javascript" src="d3/d3.v3.js"></script>
       <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script>
       <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
-      <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
 
       <meta charset="UTF-8">
   </head>
@@ -100,7 +98,7 @@
           }
 
           dataset.forEach(function(d,i) {
-            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth, stars: d.rating});
+            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth, stars: ((d.rating*100)+(mapTo(d.helpAvg))+(d.id/1000))});
             curWidth += mapToScreen(d.helpAvg);
           });
           var setupData = [];
@@ -351,7 +349,10 @@
              .duration(1000)
              .attr("x", function(d) {
                 return posArray[i].x;
-              });
+              })
+             // .attr("fill", function(d,i) { 
+             //    return ("rgb("+(d.rating* 50)+","+(d.rating*50)+",0)")
+             //  });
         });
       }
 
@@ -376,15 +377,5 @@
       }
 
     </script>
-
-    <script>
-		  $(document).ready(function(){
-			  $(".main").onepage_scroll({
-				sectionContainer: "section",
-				responsiveFallback: 600,
-				loop: false
-				});
-		  });
-		</script>
   </body>
 </html>
