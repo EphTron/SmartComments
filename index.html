@@ -189,7 +189,7 @@
               barSVG.select("#r"+parseInt(d.id))
                  .transition()
                  .duration(150)
-                 .attr("fill", "gold");
+                 .attr("fill", "#6600FF");
               var getRectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
               var rectX = getRectX;
               var showPara = 1;
@@ -204,16 +204,8 @@
               showInfo(d,showPara);
             });
 
-        marker.attr("id", function(d,i) { return "m"+i; })
-              .style("stroke", "black")
-              .style("fill", "black")
-              .attr("points", function(d,i) {
-                  return (i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
-                         (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
-                         (i*(w/bCnt)+(w/bCnt)-30)+","+13;
-               });
-
         buttons.attr("id", function(d,i) { return "b"+i; })
+               .attr("active", false)
                .attr("x", function(d,i) { return i*(w/bCnt); })
                .attr("y", 0)
                .attr("width", function(d,i) { return (w/bCnt)-20; })
@@ -221,7 +213,23 @@
                .attr("rx", 12)
                .attr("ry", 12)
                .attr("fill", "lightgrey")
+               .on("mouseover", function(d){
+                  buttonSVG.select("#b"+parseInt(d.id))
+                    .transition()
+                    .duration(100)
+                    .attr("fill", "lightblue");
+                })
+               .on("mouseout", function(d){
+                  buttonSVG.select("#b"+parseInt(d.id))
+                    .transition()
+                    .duration(100)
+                    .attr("fill", "lightgrey");
+                })
                .on("click", function(d) {
+                  buttonSVG.select("#b"+parseInt(d.id))
+                    .transition()
+                    .duration(100)
+                    .attr("fill", "lightblue")
                   clicked = clicked*-1;
                   var buttonState = clicked*d.value;
                   sortBars(posArray,barSVG,buttonState);
@@ -229,7 +237,7 @@
                 });
 
         labels.attr("id", function(d,i) { return "l"; })
-              .text(function(d,i) { return buttArray[i].state; })
+              .text(function(d,i) { return "sort by: " + buttArray[i].state; })
               .attr("x", function(d,i) { return i*(w/bCnt) + ((w/bCnt)/2-10);  })
               .attr("y", 18)
               .attr("width", function(d,i) { return (w/bCnt)-20; })
@@ -346,14 +354,10 @@
         
         if(buttonState > 0) {
           svg.select("#m"+buttonID)
-             .transition()
-             .duration(800)
              .attr("transform", "rotate("+180+","+(pntArray[0]+5) +","+pntArray[5]+")");
              //.attr("transform", "rotate(90,"+100+","+10+")");
         } else if (buttonState < 0) {
           svg.select("#m"+buttonID)
-             .transition()
-             .duration(800)
              .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");          
         }
       }
