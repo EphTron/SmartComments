@@ -134,7 +134,7 @@
         //button setup
         var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
                          {id:1 ,state:"sort by: number",  value:2},
-                         {id:2 ,state:"none",    value:3},
+                         {id:2 ,state:"sort by: stars",   value:3},
                          {id:3 ,state:"none",    value:4},
                          {id:4 ,state:"none",    value:5}];
 
@@ -215,8 +215,6 @@
               var x1 = x+(width/2);
 
               barSVG.select("#p")
-                    .transition()
-                    .duration(180)
                     .style("fill", "gold")
                     .style("stroke", "gold")
                     .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
@@ -230,8 +228,6 @@
               showInfo(d,showPara);
 
               barSVG.select("#p")
-                    .transition()
-                    .duration(180)
                     .style("fill", "white")
                     .style("stroke", "white");
             });
@@ -344,7 +340,6 @@
             return b.id - a.id;
           });
         }
-
 
         posArray.forEach(function(d,i) {
           var w_tmp = posArray[i].width;
