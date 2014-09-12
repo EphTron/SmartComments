@@ -100,7 +100,7 @@
           }
 
           dataset.forEach(function(d,i) {
-            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
+            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth, stars: d.rating});
             curWidth += mapToScreen(d.helpAvg);
           });
           var setupData = [];
@@ -181,14 +181,7 @@
 
         pointer.attr("id", "p")
                .style("fill", "white")
-               .style("stroke", "white");
-               
-               // .attr("points", function(d,i) {
-               //   var width = findByID(posArray,i).width;
-               //   var x = findByID(posArray,i).x;
-               //   var x1 = x+(width/2);
-               //   return (x1+","+50+","+(x1-5)+","+60+","+(x1+5)+","+60);
-               // });
+               .style("stroke", "white"); 
 
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
@@ -214,7 +207,7 @@
               var x = findByID(posArray,i).x;
               var x1 = x+(width/2);
 
-              barSVG.select("#p")
+              barSVG.select("#p") 
                     .style("fill", "gold")
                     .style("stroke", "gold")
                     .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
@@ -227,7 +220,7 @@
               var showPara = 0;
               showInfo(d,showPara);
 
-              barSVG.select("#p")
+              barSVG.select("#p") 
                     .style("fill", "white")
                     .style("stroke", "white");
             });
@@ -336,9 +329,17 @@
             return a.id - b.id;
           });
         } else if(buttonState == -2) {
-            posArray.sort(function(a,b) {
+          posArray.sort(function(a,b) {
             return b.id - a.id;
           });
+        } else if (buttonState == 3) {
+          posArray.sort(function(a,b) { 
+            return a.stars - b.stars;
+          })
+        } else if (buttonState == -3) {
+          posArray.sort(function(a,b) { 
+            return b.stars - a.stars;
+          })
         }
 
         posArray.forEach(function(d,i) {
