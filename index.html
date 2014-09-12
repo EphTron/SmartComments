@@ -52,7 +52,7 @@
     </div>
 
     <script type="text/javascript">
- 
+
       var w = window.innerWidth - 50;
       var h = 50;
       var lastID = -1;
@@ -64,7 +64,7 @@
       var posArray = [];
       var sortMode = 0;
       var clicked = 1;
-      
+
       var dataset;
       d3.csv("bag.csv", function(error,data){
         if(error) {
@@ -122,6 +122,8 @@
                          .enter()
                          .append("rect");
 
+        var pointer = barSVG.append("polygon");
+
         var textBox = d3.select(".smartComments")
                         .select(".textBox")
 
@@ -130,8 +132,8 @@
                            .range(["red","lightgray","green"]);
 
         //button setup
-        var buttArray = [{id:0 ,state:"helpful", value:1},
-                         {id:1 ,state:"number",  value:2},
+        var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
+                         {id:1 ,state:"sort by: number",  value:2},
                          {id:2 ,state:"none",    value:3},
                          {id:3 ,state:"none",    value:4},
                          {id:4 ,state:"none",    value:5}];
@@ -155,9 +157,9 @@
         var marker = buttonSVG.selectAll("polygon")
                               .data(buttArray)
                               .enter()
-                              .append("polygon")
+                              .append("polygon");
 
-        var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale];
+        var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer];
         return values;
       }
 
@@ -172,9 +174,21 @@
         var marker    = setupData[6];
         var textBox   = setupData[7];
         var colScl    = setupData[8];
+        var pointer   = setupData[9];
 
         var bCnt = buttArray.length; // buttonCount
         clickState=[0,0,0,0,0];
+
+        pointer.attr("id", "p")
+               .style("fill", "white")
+               .style("stroke", "white");
+               
+               // .attr("points", function(d,i) {
+               //   var width = findByID(posArray,i).width;
+               //   var x = findByID(posArray,i).x;
+               //   var x1 = x+(width/2);
+               //   return (x1+","+50+","+(x1-5)+","+60+","+(x1+5)+","+60);
+               // });
 
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
@@ -187,13 +201,25 @@
             })
             .on("mouseover",  function(d,i) {
               barSVG.select("#r"+parseInt(d.id))
-                 .transition()
-                 .duration(150)
-                 .attr("fill", "#6600FF");
+                    .transition()
+                    .duration(150)
+                    .attr("fill", "gold");
+
               var getRectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
               var rectX = getRectX;
               var showPara = 1;
               showInfo(d,textBox,showPara,rectX);
+
+              var width = findByID(posArray,i).width;
+              var x = findByID(posArray,i).x;
+              var x1 = x+(width/2);
+
+              barSVG.select("#p")
+                    .transition()
+                    .duration(180)
+                    .style("fill", "gold")
+                    .style("stroke", "gold")
+                    .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
             })
             .on("mouseout",function (d) {
               barSVG.select("#r"+parseInt(d.id))
@@ -202,6 +228,13 @@
                  .attr("fill", colScl(d.helpAvg));
               var showPara = 0;
               showInfo(d,showPara);
+
+
+              barSVG.select("#p")
+                    .transition()
+                    .duration(180)
+                    .style("fill", "white")
+                    .style("stroke", "white");
             });
 
         buttons.attr("id", function(d,i) { return "b"+i; })
@@ -243,39 +276,36 @@
               .attr("width", function(d,i) { return (w/bCnt)-20; })
               .attr("height", 20)
               .attr("text-anchor", "middle");
-              
+
         marker.attr("id", function(d,i) { return "m"+i; })
               .style("stroke", "black")
               .style("fill", "black")
               .attr("points", function(d,i) {
-                  return (i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
-                         (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
-                         (i*(w/bCnt)+(w/bCnt)-30)+","+13;
+                  return ((i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
+                          (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
+                          (i*(w/bCnt)+(w/bCnt)-30)+","+13);
                });
       }
-      
+
       function showInfo(data, textBox, showPara, rectX){
 
         if (showPara == 1){
-        
-        d3.select(".textNr")
-          .text("Nr.:" + data.id);
-        d3.select(".textNr")
-          .text("Nr.:" + data.id);
-          
-        d3.select(".textInfo")
-          .text("Sterne: "+ data.rating + "\n" + data.infoText);
-        textStyle(textBox,rectX);
-        } 
+          d3.select(".textNr")
+            .text("Nr.:" + data.id);
+          d3.select(".textNr")
+            .text("Nr.:" + data.id);
+          d3.select(".textInfo")
+            .text("Sterne: "+ data.rating + "\n" + data.infoText);
+          textStyle(textBox,rectX);
+        }
         else if(showPara == 0){
-        d3.select(".textNr")
-          .text("");
-
-        d3.select(".textInfo")
-          .text("");
+          d3.select(".textNr")
+            .text("");
+          d3.select(".textInfo")
+            .text("");
         }
       }
-      
+
       function textStyle(textBox, rectX) {
         if(rectX < 400) {
           textBox.transition()
@@ -297,7 +327,7 @@
             .style("margin-left", (rectX-400+25)+"px");
         }
       };
-      
+
       function mapToScreen(val) {
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
@@ -351,18 +381,24 @@
         console.log(buttonID);
         var points = svg.select("#m"+buttonID).attr("points");
         var pntArray = points.split(",").map(Number);
-        
+
         if(buttonState > 0) {
           svg.select("#m"+buttonID)
              .attr("transform", "rotate("+180+","+(pntArray[0]+5) +","+pntArray[5]+")");
-             //.attr("transform", "rotate(90,"+100+","+10+")");
         } else if (buttonState < 0) {
           svg.select("#m"+buttonID)
-             .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");          
+             .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");
         }
       }
 
+      function findByID(src,id) {
+        return src.filter( function(obj) {
+          return +obj.id == id;
+        })[0];
+      }
+
     </script>
+
     <script>
 		  $(document).ready(function(){
 			  $(".main").onepage_scroll({
