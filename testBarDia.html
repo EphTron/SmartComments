@@ -33,38 +33,40 @@
   var sortArray = [];
 
   var dataset;
-  d3.csv("bag.csv", type, function(error, data) {
-    if(error) {
-      console.log(error);
-    } else {
-      dataset = data;
-      
-      data.forEach(function(d) {
-        d.id = d.id;
-        d.rating = +d.rating;
-      });
+  d3.csv("tent.csv", type, function(error, data) {
+    dataset=data;
 
-      var timeFormat = d3.time.format("%d-%B-%Y");
-      data.forEach(function(d,i) { 
-        sortArray.push({id: d.id, stars: d.rating, date: timeFormat.parse(d.date)})
-      })
-    }
+    data.forEach(function(d) { 
+      d.id = d.id;
+      d.rating = +d.rating;
+    });
+
+    var timeFormat = d3.time.format("%B %d, %Y");
+    data.forEach(function(d,i) {
+      sortArray.push({id: d.id, stars: d.rating, date: d.date});
+    });
+    drawBarchart(data,sortArray);
   });
 
+function drawBarchart(data,sortArray) {
+  
   var margin = {top: 20, right: 20, bottom: 30, left: 40},
       width = window.innerWidth - margin.left - margin.right,
-      height = 200 - margin.top - margin.bottom;
+      height = 300 - margin.top - margin.bottom;
+
 
   var x = d3.scale.ordinal()
       .rangeRoundBands([0, width], .1);
-
-
-  //var parseDate = d3.time.format("%d% %m %y").parse;
-
-  //var x = d3.time.scale().range([0, width]);
       
   var y = d3.scale.linear()
       .range([height, 0]);
+
+  var svg = d3.select("body")
+              .append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   var xAxis = d3.svg.axis()
       .scale(x)
@@ -75,12 +77,6 @@
       .orient("left")
       .ticks(6);
 
-  var svg = d3.select("body")
-              .append("svg")
-              .attr("width", width + margin.left + margin.right)
-              .attr("height", height + margin.top + margin.bottom)
-              .append("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
   x.domain(data.map(function(d) { return d.id; }));
   y.domain([0, d3.max(data, function(d) { return d.rating; })]);
@@ -94,7 +90,7 @@
       .attr("dx", "-.8em")
       .attr("dy", ".15em")
       .attr("transform", function(d) {
-        return "rotate(-65)" 
+        return "rotate(-45)" 
        });
 
   svg.append("g")
@@ -116,7 +112,7 @@
       .attr("y", function(d) { return y(d.rating); })
       .attr("height", function(d) { return height - y(d.rating); });
 
-});
+}
 
 function type(d) {
   d.frequency = +d.frequency;
