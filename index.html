@@ -3,20 +3,14 @@
   <head>
       <title>Visu Beleg</title>
       <link rel="stylesheet" href="indexstyle.css">
-      <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
       <script type="text/javascript" src="d3/d3.v3.js"></script>
-      <script type="text/javascript" src="d3/fisheye.js"></script>
       <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script>
       <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
-      <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
-
       <meta charset="UTF-8">
   </head>
   <body>
     <div class="wrapper">
       <div class="main">
-
-        <section class="page1">
         <div class="productFrame">
             <h1>Product</h1>
             <div class="productPicture">
@@ -30,9 +24,6 @@
               <p>AUF LAGER</p>
             </div>
         </div>
-        </section>
-
-        <section class="page2">
           <div class="smartComments">
               <h4>Kundenrezensionen</h4>
               <div class="sortButtons" unselectable="yes" onselectstart="return false">
@@ -48,7 +39,6 @@
                 <div class="textHelp"></div>
               </div>
           </div>
-        </section>
       </div>
     </div>
 
@@ -65,15 +55,28 @@
       var posArray = [];
       var sortMode = 0;
       var clicked = 1;
-
+      var activeId = 0;
+      var showPara = 1;
+      var dataset = [];
 
       var dataset;
-      d3.csv("tent2.csv", function(error,data){
+      d3.csv("tent.csv", function(error,data){
         if(error) {
           console.log(error);
         } else {
+          
           dataset = data;
-
+          dataset.push({id:dataset.length,
+            nix: "XX",
+            product:"B00",
+            rating:"5.0",
+            helpPos:"0",
+            helpAll:"0",
+            date: "August 2, 2014",
+            userId: "Ephra",
+            infoTitle: "schleeecht",
+            infoText: "kann einfach gar nix das teil"
+          });
           dataset.forEach(function(d) {
             d["helpNeg"] = (d.helpAll - d.helpPos);
             d["helpAvg"] = (d.helpPos - d.helpNeg);
@@ -105,6 +108,7 @@
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
           });
+
           var setupData = [];
           setupData = setup(data);
 
@@ -118,7 +122,6 @@
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h + 10);
-
         var bars = barSVG.selectAll("rect")
                          .data(data)
                          .enter()
@@ -160,7 +163,24 @@
                               .data(buttArray)
                               .enter()
                               .append("polygon");
-        setupFish();
+                              
+        //var getRectX = barSVG.select("#r"+parseInt(activeId)).attr("x");
+        //var rectX = getRectX;                      
+        //barSVG.select("#r"+parseInt(activeId))
+        //            .transition()
+        //            .duration(100)
+        //            .attr("fill", "#66CCFF");
+        //showInfo(textBox,rectX);
+        //var width = findByID(posArray).width;
+        //var x = findByID(posArray,activeId).x;
+        //var x1 = x+(width/2);
+
+        //barSVG.select("#p")
+        //      .transition()
+        //      .duration(100)
+        //      .style("fill", "#66CCFF")
+        //      .style("stroke", "#66CCFF")
+        //      .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
 
         var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer];
         return values;
@@ -192,64 +212,63 @@
             .attr("width", function(d,i) { return posArray[i].width })
             .attr("height", h)
             .attr("stroke", "white")
-            .attr("fill", function(d) {
-              return colScl(d.helpAvg);
-            })
+            .attr("fill", function(d) {return colScl(d.helpAvg);})
             .on("mouseover",  function(d,i) {
-              var mouse = d3.mouse(this);
-              fisheyeScale.distortion(3).focus(mouse[0]);
-              barSVG.select("#r"+parseInt(d.id))
+              if(showPara != 2){
+                showPara = 1;
+                activeId = d.id;
+              
+                var rectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
+  
+                showInfo(textBox,rectX);
+                barSVG.select("#r"+parseInt(d.id))
                     .transition()
                     .duration(100)
                     .attr("fill", "#66CCFF");
-                    
-              curWidth = 0;
-              posArray.forEach(function(d,i) {
-                var w_tmp = fisheyeScale(posArray[i].width);
-                d3.select("#r"+(posArray[i].id))
-                  .transition()
-                  .duration(50)
-                  .attr("x", function(d) { return curWidth; })
-                  .attr("width", function(d) {
-                   
-                    return fishScl(d.helpAvg);
-                  });
-                curWidth += w_tmp;
-                //console.log(d3.select("#r"+(posArray[i].id)));
-              });
-                
-              
 
-              var getRectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
-              var rectX = getRectX;
-              var showPara = 1;
-              showInfo(d,textBox,showPara,rectX);
+                var width = findByID(posArray,i).width;
+                var x = findByID(posArray,i).x;
+                var x1 = x+(width/2);
 
-              var width = findByID(posArray,i).width;
-              var x = findByID(posArray,i).x;
-              var x1 = x+(width/2);
-
-              barSVG.select("#p")
-                    .transition()
-                    .duration(100)
-                    .style("fill", "#66CCFF")
-                    .style("stroke", "#66CCFF")
-                    .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+                barSVG.select("#p")
+                      .transition()
+                      .duration(100)
+                      .style("fill", "#66CCFF")
+                      .style("stroke", "#66CCFF")
+                      .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+              }
             })
             .on("mouseout",function (d) {
-              barSVG.select("#r"+parseInt(d.id))
-                 .transition()
-                 .duration(150)
-                 .attr("fill", colScl(d.helpAvg));
-              var showPara = 0;
-              showInfo(d,showPara);
-
-
-              barSVG.select("#p")
-                    .transition()
-                    .duration(50)
-                    .style("fill", "white")
-                    .style("stroke", "white");
+              if(showPara != 2){
+                
+                barSVG.select("#r"+parseInt(d.id))
+                   .transition()
+                   .duration(150)
+                   .attr("fill", colScl(d.helpAvg));
+                barSVG.select("#p")
+                      .transition()
+                      .duration(50)
+                      .style("fill", "white")
+                      .style("stroke", "white");
+                showPara = 0;
+                activeId = d.id;
+                showInfo(textBox);
+              }
+            })
+            .on("click", function (d) {
+              if (showPara == 1 || showPara == 0){
+                  showPara = 2;
+                  activeId = d.id;
+                  console.log("clicked ->"+ showPara);
+              } else if (showPara == 2){
+                  barSVG.select("#r"+parseInt(activeId))
+                   .transition()
+                   .duration(150)
+                   .attr("fill", colScl(dataset[activeId].helpAvg));
+                  showPara = 1;
+                  activeId = 0;
+                  console.log("clicked again ..."+showPara);
+              }
             });
 
         buttons.attr("id", function(d,i) { return "b"+i; })
@@ -280,12 +299,12 @@
                     .attr("fill", "lightblue")
                   clicked = clicked*-1;
                   var buttonState = clicked*d.value;
-                  sortBars(posArray,barSVG,buttonState);
+                  sortBars(posArray,barSVG,buttonState,textBox);
                   changeMarkerState(buttonSVG,marker,buttonState,d.id);
                 });
 
         labels.attr("id", function(d,i) { return "l"; })
-              .text(function(d,i) { return "sort by: " + buttArray[i].state; })
+              .text(function(d,i) { return buttArray[i].state; })
               .attr("x", function(d,i) { return i*(w/bCnt) + ((w/bCnt)/2-10);  })
               .attr("y", 18)
               .attr("width", function(d,i) { return (w/bCnt)-20; })
@@ -302,18 +321,24 @@
               });
       }
 
-      function showInfo(data, textBox, showPara, rectX){
-
+      function showInfo(textBox,rectX){
         if (showPara == 1){
+          d3.select(".textBox")
+            .style("display", "block")
           d3.select(".textNr")
-            .text("Nr.:" + data.id);
+            .text("Nr.:" + dataset[activeId].id);
           d3.select(".textNr")
-            .text("Nr.:" + data.id);
+            .text("Nr.:" + dataset[activeId].id);
           d3.select(".textInfo")
-            .text("Sterne: "+ data.rating + "\n" + data.infoText);
-          textStyle(textBox,rectX);
+            .text("Sterne: "+ dataset[activeId].rating + "\n" + dataset[activeId].infoText);
+          if (showPara != 2) {
+            textStyle(textBox,rectX,250);
+          }
         }
         else if(showPara == 0){
+         console.log("i dont care "+showPara);
+          d3.select(".textBox")
+            .style("display", "none")
           d3.select(".textNr")
             .text("");
           d3.select(".textInfo")
@@ -321,25 +346,19 @@
         }
       }
 
-      function textStyle(textBox, rectX) {
+      function textStyle(textBox,rectX,delay) {
         if(rectX < 400) {
           textBox.transition()
-            .duration(180)
-            .style("width", "800px")
-            .style("height", "200px")
-            .style("margin-left", 25+"px");
+            .duration(delay)
+            .style("margin-left", 17+"px");
         } else if (rectX > (w-400)) {
-          textBox.transition()
-            .duration(180)
-            .style("width", "800px")
-            .style("height", "200px")
-            .style("margin-left", (w-800+25)+"px");
+         textBox.transition()
+            .duration(delay)
+            .style("margin-left", (w-800+7)+"px");
         } else {
           textBox.transition()
-            .duration(180)
-            .style("width", "800px")
-            .style("height", "200px")
-            .style("margin-left", (rectX-400+25)+"px");
+            .duration(delay)
+            .style("margin-left", (rectX-400+17)+"px");
         }
       };
 
@@ -357,7 +376,7 @@
         return s(val);
       }
 
-      var sortBars = function(posArray,svg,buttonState) {
+      var sortBars = function(posArray,svg,buttonState,textBox) {
         curWidth = 0;
 
         if(buttonState == 1) {
@@ -378,7 +397,6 @@
           });
         }
 
-
         posArray.forEach(function(d,i) {
           var w_tmp = posArray[i].width;
           posArray[i].x = curWidth;
@@ -390,6 +408,18 @@
                 return posArray[i].x;
               });
         });
+        var rectX = findByID(posArray,activeId).x;
+        var width = findByID(posArray,activeId).width;
+        var x1 = parseFloat(rectX) + parseFloat(width/2);
+        if(showPara == 2){
+          svg.select("#p")
+              .transition()
+              .duration(1000)
+              .style("fill", "#66CCFF")
+              .style("stroke", "#66CCFF")
+              .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+        }
+        textStyle(textBox,rectX,1000);
       }
 
       function changeMarkerState(svg,marker,buttonState,buttonID) {
@@ -413,15 +443,5 @@
       }
 
     </script>
-
-    <script>
-		  $(document).ready(function(){
-			  $(".main").onepage_scroll({
-				sectionContainer: "section",
-				responsiveFallback: 600,
-				loop: false
-				});
-		  });
-		</script>
   </body>
 </html>
