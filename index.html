@@ -12,9 +12,10 @@
     <div class="wrapper">
       <div class="main">
         <div class="productFrame">
-            <h1>Product</h1>
+          <img src="./pictures/leatherAmazon.png" alt="Picture Bag" width="1400">
+          <!-- <h1>Product</h1>
             <div class="productPicture">
-              <img src="./pictures/bag.png" alt="Picture Bag">
+             <img src="./pictures/amazonSeite.png" alt="Picture Bag">
             </div>
             <div class="productInfo">
               <h4>MUMIENSCHLAFSACK LIGHT 600 4651</h4>
@@ -22,7 +23,7 @@
               <p><img src="./pictures/stars.png" alt="Picture Stars"> 84 Kundenrezensionen</p>
               <p>Preis:  17,90</p>
               <p>AUF LAGER</p>
-            </div>
+            </div> -->
         </div>
           <div class="smartComments">
               <h4>Kundenrezensionen</h4>
@@ -55,33 +56,44 @@
       var posArray = [];
       var sortMode = 0;
       var clicked = 1;
+      var mostHelpfulId = 0;
       var activeId = 0;
       var showPara = 3;
       var dataset = [];
-
+      var answerSet = [];
+      // TO DO today: addButton; answer visualization; write down some answers; activeButton color; 
+      // TO DO general: add barchartdiagramm; add brushing and linkin; adjust text style;
       var dataset;
-      d3.csv("tent.csv", function(error,data){
+      d3.csv("leather2.csv", function(error,data){
         if(error) {
           console.log(error);
         } else {
-          
+
           dataset = data;
-          dataset.push({id:dataset.length,
-            ref: "XX",
-            product:"B00",
-            rating:"5.0",
-            helpPos:"0",
-            helpAll:"0",
-            date: "August 2, 2014",
-            userId: "Ephra",
-            infoTitle: "schleeecht",
-            infoText: "kann einfach gar nix das teil"
-          });
+          
+          //d3.csv("tent.csv", function(error,data){
+          //  if(error) {
+          //console.log(error);
+          //} else {
+           //   answerSet = data;
+           // }
+          //}
+          //dataset.push({id:dataset.length,
+          //  ref: "XX",
+          //  product:"B00",
+          //  rating:"5.0",
+          //  helpPos:"0",
+          //  helpAll:"0",
+          //  date: "August 2, 2014",
+          //  userId: "Ephra",
+          //  infoTitle: "schleeecht",
+          //  infoText: "kann einfach gar nix das teil"
+          //});
           dataset.forEach(function(d) {
             d["helpNeg"] = (d.helpAll - d.helpPos);
             d["helpAvg"] = (d.helpPos - d.helpNeg);
           });
-
+          console.log(dataset);
           minHelpAvg = d3.min(data,function(d) {
             return parseInt(d.helpAvg);
           });
@@ -107,12 +119,13 @@
           dataset.forEach(function(d,i) {
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
-            
-           // mostHelpfulId = 
+            if (parseInt(d.helpAvg) > parseInt(dataset[mostHelpfulId].helpAvg)) {
+              mostHelpfulId = d.id;
+            }
           });
-          //activeId = mostHelpfulId;
+          activeId = mostHelpfulId;
           var setupData = [];
-          setupData = setup(data);
+          setupData = setup(dataset);
 
           draw(dataset,posArray,setupData);
         }
@@ -184,7 +197,6 @@
         var pointer   = setupData[9];
 
         var bCnt = buttArray.length; // buttonCount
-        clickState=[0,0,0,0,0];
 
         pointer.attr("id", "p")
                .style("fill", "white")
@@ -278,8 +290,8 @@
                       .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
               }
             });
-        //set  position and color of marker and activeId rect on first visit
-        initMarkerPosition(textBox);
+        //set  position and color of marker and activeId rect on FIRST VISIT
+        firstVisitInit(textBox);
 
         buttons.attr("id", function(d,i) { return "b"+i; })
                .attr("active", false)
@@ -287,8 +299,9 @@
                .attr("y", 0)
                .attr("width", function(d,i) { return (w/bCnt)-20; })
                .attr("height", 25)
-               .attr("rx", 12)
-               .attr("ry", 12)
+               .attr("rx", 6)
+               .attr("ry", 6)
+               .attr("stroke", "black")
                .attr("fill", "lightgrey")
                .on("mouseover", function(d){
                   buttonSVG.select("#b"+parseInt(d.id))
@@ -332,7 +345,7 @@
       }
 
       function showInfo(textBox,rectX){
-        if (showPara == 1){
+        if (showPara == 1 || showPara == 3){
           d3.select(".textBox")
             .style("display", "block")
           d3.select(".textNr")
@@ -447,7 +460,7 @@
         }
       }
       
-      function initMarkerPosition(textBox) {
+      function firstVisitInit(textBox) {
         var width = findByID(posArray,activeId).width;
         var x = findByID(posArray,activeId).x;
         var x1 = parseFloat(x) + parseFloat(width/2);
