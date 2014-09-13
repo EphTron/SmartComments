@@ -56,7 +56,7 @@
       var sortMode = 0;
       var clicked = 1;
       var activeId = 0;
-      var showPara = 1;
+      var showPara = 3;
       var dataset = [];
 
       var dataset;
@@ -67,7 +67,7 @@
           
           dataset = data;
           dataset.push({id:dataset.length,
-            nix: "XX",
+            ref: "XX",
             product:"B00",
             rating:"5.0",
             helpPos:"0",
@@ -107,8 +107,10 @@
           dataset.forEach(function(d,i) {
             posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
+            
+           // mostHelpfulId = 
           });
-
+          //activeId = mostHelpfulId;
           var setupData = [];
           setupData = setup(data);
 
@@ -121,7 +123,7 @@
         var barSVG = d3.select(".barChart")
                     .append("svg")
                     .attr("width", w)
-                    .attr("height", h + 10);
+                    .attr("height", h+10);
         var bars = barSVG.selectAll("rect")
                          .data(data)
                          .enter()
@@ -164,24 +166,6 @@
                               .enter()
                               .append("polygon");
                               
-        //var getRectX = barSVG.select("#r"+parseInt(activeId)).attr("x");
-        //var rectX = getRectX;                      
-        //barSVG.select("#r"+parseInt(activeId))
-        //            .transition()
-        //            .duration(100)
-        //            .attr("fill", "#66CCFF");
-        //showInfo(textBox,rectX);
-        //var width = findByID(posArray).width;
-        //var x = findByID(posArray,activeId).x;
-        //var x1 = x+(width/2);
-
-        //barSVG.select("#p")
-        //      .transition()
-        //      .duration(100)
-        //      .style("fill", "#66CCFF")
-        //      .style("stroke", "#66CCFF")
-        //      .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
-
         var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer];
         return values;
       }
@@ -215,6 +199,12 @@
             .attr("fill", function(d) {return colScl(d.helpAvg);})
             .on("mouseover",  function(d,i) {
               if(showPara != 2){
+                if (showPara == 3){
+                barSVG.select("#r"+parseInt(activeId))
+                   .transition()
+                   .duration(150)
+                   .attr("fill", colScl(dataset[activeId].helpAvg));
+                }
                 showPara = 1;
                 activeId = d.id;
               
@@ -257,19 +247,39 @@
             })
             .on("click", function (d) {
               if (showPara == 1 || showPara == 0){
-                  showPara = 2;
-                  activeId = d.id;
-                  console.log("clicked ->"+ showPara);
+                showPara = 2;
+                activeId = d.id;
+                console.log("clicked ->"+ showPara);
               } else if (showPara == 2){
-                  barSVG.select("#r"+parseInt(activeId))
-                   .transition()
-                   .duration(150)
-                   .attr("fill", colScl(dataset[activeId].helpAvg));
-                  showPara = 1;
-                  activeId = 0;
-                  console.log("clicked again ..."+showPara);
+                barSVG.select("#r"+parseInt(activeId))
+                 .transition()
+                 .duration(150)
+                 .attr("fill", colScl(dataset[activeId].helpAvg));
+
+                showPara = 1;
+                activeId = d.id;;
+                console.log("clicked again ..."+showPara);
+                
+                var rectX = findByID(posArray,activeId).x;
+
+                showInfo(textBox,rectX);
+                barSVG.select("#r"+parseInt(d.id))
+                  .transition()
+                  .duration(100)
+                  .attr("fill", "#66CCFF");
+
+                var width = findByID(posArray,activeId).width;
+                var x1 = parseFloat(rectX) + parseFloat(width/2);
+                barSVG.select("#p")
+                      .transition()
+                      .duration(100)
+                      .style("fill", "#66CCFF")
+                      .style("stroke", "#66CCFF")
+                      .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
               }
             });
+        //set  position and color of marker and activeId rect on first visit
+        initMarkerPosition(textBox);
 
         buttons.attr("id", function(d,i) { return "b"+i; })
                .attr("active", false)
@@ -411,7 +421,8 @@
         var rectX = findByID(posArray,activeId).x;
         var width = findByID(posArray,activeId).width;
         var x1 = parseFloat(rectX) + parseFloat(width/2);
-        if(showPara == 2){
+        console.log("x = " + x1);
+        if(showPara == 2 || showPara == 3){
           svg.select("#p")
               .transition()
               .duration(1000)
@@ -423,7 +434,7 @@
       }
 
       function changeMarkerState(svg,marker,buttonState,buttonID) {
-        console.log(buttonID);
+        //console.log(buttonID);
         var points = svg.select("#m"+buttonID).attr("points");
         var pntArray = points.split(",").map(Number);
 
@@ -434,6 +445,27 @@
           svg.select("#m"+buttonID)
              .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");
         }
+      }
+      
+      function initMarkerPosition(textBox) {
+        var width = findByID(posArray,activeId).width;
+        var x = findByID(posArray,activeId).x;
+        var x1 = parseFloat(x) + parseFloat(width/2);
+        d3.select(".barChart")
+              .select("#r"+parseInt(activeId))
+              .transition()
+              .duration(100)
+              .attr("fill", "#66CCFF");
+        showInfo(textBox,x);
+        textStyle(textBox,x,250);
+  
+        d3.select(".barChart")
+          .select("#p")
+          .transition()
+          .duration(100)
+          .style("fill", "#66CCFF")
+          .style("stroke", "#66CCFF")
+          .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
       }
 
       function findByID(src,id) {
