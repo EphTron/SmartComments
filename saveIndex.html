@@ -3,24 +3,19 @@
   <head>
       <title>Visu Beleg</title>
       <link rel="stylesheet" href="indexstyle.css">
-      <link rel="stylesheet" href="./scroll/onepage-scroll.css" >
       <script type="text/javascript" src="d3/d3.v3.js"></script>
-      <script type="text/javascript" src="d3/fisheye.js"></script>
       <script type="text/javascript" src="jQuery/jquery-2.1.1.min.js"></script>
       <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script> -->
-      <script type="text/javascript" src="./scroll/jquery.onepage-scroll.js"></script>
-
       <meta charset="UTF-8">
   </head>
   <body>
     <div class="wrapper">
       <div class="main">
-
-        <section class="page1">
         <div class="productFrame">
-            <h1>Product</h1>
+          <img src="./pictures/leatherAmazon.png" alt="Picture Bag" width="1400">
+          <!-- <h1>Product</h1>
             <div class="productPicture">
-              <img src="./pictures/bag.png" alt="Picture Bag">
+             <img src="./pictures/amazonSeite.png" alt="Picture Bag">
             </div>
             <div class="productInfo">
               <h4>MUMIENSCHLAFSACK LIGHT 600 4651</h4>
@@ -28,11 +23,8 @@
               <p><img src="./pictures/stars.png" alt="Picture Stars"> 84 Kundenrezensionen</p>
               <p>Preis:  17,90</p>
               <p>AUF LAGER</p>
-            </div>
+            </div> -->
         </div>
-        </section>
-
-        <section class="page2">
           <div class="smartComments">
               <h4>Kundenrezensionen</h4>
               <div class="sortButtons" unselectable="yes" onselectstart="return false">
@@ -46,9 +38,15 @@
                 <div class="textTitle"></div>
                 <div class="textInfo"></div>
                 <div class="textHelp"></div>
+                <div class="answerChart"></div>
+              </div>
+              <div class ="answerBox">
+                <div class="textNr"></div>
+                <div class="textAuthor"></div>
+                <div class="textInfo"></div>
+                <div class="textHelp"></div>
               </div>
           </div>
-        </section>
       </div>
     </div>
 
@@ -65,27 +63,64 @@
       var posArray = [];
       var sortMode = 0;
       var clicked = 1;
-
-
-      var dataset;
-      d3.csv("tent2.csv", function(error,data){
+      var mostHelpfulId = 0;
+      var activeId = 0;
+      var showPara = 3;
+      var dataset = [];
+      var answerSet = [];
+      var aMinHelpAvg = 0;
+      var aMaxHelpAvg = 0;
+      // TO DO today: addButton; answer visualization; write down some answers; activeButton color; fisheye;
+      // TO DO general: add barchartdiagramm; add brushing and linkin; adjust text style;
+      d3.csv("leatherAnswers.csv", function(error,data){
         if(error) {
           console.log(error);
         } else {
-          dataset = data;
+          answerSet = data;
+          
+          answerSet.forEach(function(d) {
+          d["helpNeg"] = (d.helpAll - d.helpPos);
+          d["helpAvg"] = (d.helpPos - d.helpNeg);
+          });
+          aMinHelpAvg = d3.min(data,function(d) {
+            return parseInt(d.helpAvg);
+          });
+          aMaxHelpAvg = d3.max(data,function(d) {
+            return parseInt(d.helpAvg)
+          });
+        }
+      });
+      var dataset;
+      d3.csv("leather.csv", function(error,data){
+        if(error) {
+          console.log(error);
+        } else {
 
+          dataset = data;
+          console.log(answerSet);
+          //dataset.push({id:dataset.length,
+          //  ref: "XX",
+          //  product:"B00",
+          //  rating:"5.0",
+          //  helpPos:"0",
+          //  helpAll:"0",
+          //  date: "August 2, 2014",
+          //  userId: "Ephra",
+          //  infoTitle: "schleeecht",
+          //  infoText: "kann einfach gar nix das teil"
+          //});
           dataset.forEach(function(d) {
             d["helpNeg"] = (d.helpAll - d.helpPos);
             d["helpAvg"] = (d.helpPos - d.helpNeg);
           });
-
           minHelpAvg = d3.min(data,function(d) {
             return parseInt(d.helpAvg);
           });
           maxHelpAvg = d3.max(data,function(d) {
             return parseInt(d.helpAvg)
           });
-
+          
+          console.log(dataset);
           dataset.forEach(function(d) {
             totalWidth += mapTo(d.helpAvg);
           });
@@ -102,11 +137,15 @@
           }
 
           dataset.forEach(function(d,i) {
-            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth});
+            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), stars: (d.rating*100)+(mapTo(d.helpAvg))+(d.id/1000), x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
+            if (parseInt(d.helpAvg) > parseInt(dataset[mostHelpfulId].helpAvg)) {
+              mostHelpfulId = d.id;
+            }
           });
+          activeId = mostHelpfulId;
           var setupData = [];
-          setupData = setup(data);
+          setupData = setup(dataset);
 
           draw(dataset,posArray,setupData);
         }
@@ -117,8 +156,7 @@
         var barSVG = d3.select(".barChart")
                     .append("svg")
                     .attr("width", w)
-                    .attr("height", h + 10);
-
+                    .attr("height", h+10);
         var bars = barSVG.selectAll("rect")
                          .data(data)
                          .enter()
@@ -136,7 +174,7 @@
         //button setup
         var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
                          {id:1 ,state:"sort by: number",  value:2},
-                         {id:2 ,state:"none",    value:3},
+                         {id:2 ,state:"sort by: stars",   value:3},
                          {id:3 ,state:"none",    value:4},
                          {id:4 ,state:"none",    value:5}];
 
@@ -160,8 +198,7 @@
                               .data(buttArray)
                               .enter()
                               .append("polygon");
-        setupFish();
-
+                              
         var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer];
         return values;
       }
@@ -180,18 +217,10 @@
         var pointer   = setupData[9];
 
         var bCnt = buttArray.length; // buttonCount
-        clickState=[0,0,0,0,0];
 
         pointer.attr("id", "p")
                .style("fill", "white")
                .style("stroke", "white");
-               
-               // .attr("points", function(d,i) {
-               //   var width = findByID(posArray,i).width;
-               //   var x = findByID(posArray,i).x;
-               //   var x1 = x+(width/2);
-               //   return (x1+","+50+","+(x1-5)+","+60+","+(x1+5)+","+60);
-               // });
 
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
@@ -199,65 +228,89 @@
             .attr("width", function(d,i) { return posArray[i].width })
             .attr("height", h)
             .attr("stroke", "white")
-            .attr("fill", function(d) {
-              return colScl(d.helpAvg);
-            })
+            .attr("fill", function(d) {return colScl(d.helpAvg);})
             .on("mouseover",  function(d,i) {
-              var mouse = d3.mouse(this);
-              fisheyeScale.distortion(3).focus(mouse[0]);
-              barSVG.select("#r"+parseInt(d.id))
+              if(showPara != 2){
+                if (showPara == 3){
+                barSVG.select("#r"+parseInt(activeId))
+                   .transition()
+                   .duration(100)
+                   .attr("fill", colScl(dataset[activeId].helpAvg));
+                }
+                showPara = 1;
+                activeId = d.id;
+              
+                var rectX = findByID(posArray,i).x;
+                var width = findByID(posArray,i).width;
+                var x1 = parseFloat(rectX)+parseFloat(width/2);
+                showInfo(textBox,rectX);
+                
+                barSVG.select("#r"+parseInt(d.id))
                     .transition()
                     .duration(100)
                     .attr("fill", "#66CCFF");
-                    
-              curWidth = 0;
-              posArray.forEach(function(d,i) {
-                var w_tmp = fisheyeScale(posArray[i].width);
-                d3.select("#r"+(posArray[i].id))
-                  .transition()
-                  .duration(50)
-                  .attr("x", function(d) { return curWidth; })
-                  .attr("width", function(d) {
-                   
-                    return fishScl(d.helpAvg);
-                  });
-                curWidth += w_tmp;
-                //console.log(d3.select("#r"+(posArray[i].id)));
-              });
-                
-              
 
-              var getRectX = barSVG.select("#r"+parseInt(d.id)).attr("x");
-              var rectX = getRectX;
-              var showPara = 1;
-              showInfo(d,textBox,showPara,rectX);
-
-              var width = findByID(posArray,i).width;
-              var x = findByID(posArray,i).x;
-              var x1 = x+(width/2);
-
-              barSVG.select("#p")
-                    .transition()
-                    .duration(100)
-                    .style("fill", "#66CCFF")
-                    .style("stroke", "#66CCFF")
-                    .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+                barSVG.select("#p")
+                      .transition()
+                      .duration(100)
+                      .style("fill", "#66CCFF")
+                      .style("stroke", "#66CCFF")
+                      .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+              }
             })
             .on("mouseout",function (d) {
-              barSVG.select("#r"+parseInt(d.id))
+              if(showPara != 2){
+                
+                barSVG.select("#r"+parseInt(d.id))
+                   .transition()
+                   .duration(100)
+                   .attr("fill", colScl(d.helpAvg));
+                barSVG.select("#p")
+                      .transition()
+                      .duration(50)
+                      .style("fill", "white")
+                      .style("stroke", "white");
+                showPara = 0;
+                activeId = d.id;
+                showInfo(textBox);
+              }
+            })
+            .on("click", function (d) {
+              if (showPara == 1 || showPara == 0){
+                showPara = 2;
+                activeId = d.id;
+                console.log("clicked ->"+ showPara);
+                drawAnswers(answerSet,d.id);
+              } else if (showPara == 2){
+                barSVG.select("#r"+parseInt(activeId))
                  .transition()
-                 .duration(150)
-                 .attr("fill", colScl(d.helpAvg));
-              var showPara = 0;
-              showInfo(d,showPara);
+                 .duration(100)
+                 .attr("fill", colScl(dataset[activeId].helpAvg));
 
+                showPara = 1;
+                activeId = d.id;;
+                console.log("clicked again ..."+showPara);
+                
+                var rectX = findByID(posArray,activeId).x;
 
-              barSVG.select("#p")
-                    .transition()
-                    .duration(50)
-                    .style("fill", "white")
-                    .style("stroke", "white");
+                showInfo(textBox,rectX);
+                barSVG.select("#r"+parseInt(d.id))
+                  .transition()
+                  .duration(100)
+                  .attr("fill", "#66CCFF");
+
+                var width = findByID(posArray,activeId).width;
+                var x1 = parseFloat(rectX) + parseFloat(width/2);
+                barSVG.select("#p")
+                      .transition()
+                      .duration(100)
+                      .style("fill", "#66CCFF")
+                      .style("stroke", "#66CCFF")
+                      .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+              }
             });
+        //set  position and color of marker and activeId rect on FIRST VISIT
+        firstVisitInit(textBox);
 
         buttons.attr("id", function(d,i) { return "b"+i; })
                .attr("active", false)
@@ -265,8 +318,9 @@
                .attr("y", 0)
                .attr("width", function(d,i) { return (w/bCnt)-20; })
                .attr("height", 25)
-               .attr("rx", 12)
-               .attr("ry", 12)
+               .attr("rx", 6)
+               .attr("ry", 6)
+               .attr("stroke", "black")
                .attr("fill", "lightgrey")
                .on("mouseover", function(d){
                   buttonSVG.select("#b"+parseInt(d.id))
@@ -287,12 +341,12 @@
                     .attr("fill", "lightblue")
                   clicked = clicked*-1;
                   var buttonState = clicked*d.value;
-                  sortBars(posArray,barSVG,buttonState);
+                  sortBars(posArray,barSVG,buttonState,textBox);
                   changeMarkerState(buttonSVG,marker,buttonState,d.id);
                 });
 
         labels.attr("id", function(d,i) { return "l"; })
-              .text(function(d,i) { return "sort by: " + buttArray[i].state; })
+              .text(function(d,i) { return buttArray[i].state; })
               .attr("x", function(d,i) { return i*(w/bCnt) + ((w/bCnt)/2-10);  })
               .attr("y", 18)
               .attr("width", function(d,i) { return (w/bCnt)-20; })
@@ -306,21 +360,27 @@
                   return ((i*(w/bCnt)+(w/bCnt)-40)+","+8+","+
                           (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
                           (i*(w/bCnt)+(w/bCnt)-30)+","+13);
-               });
+              });
       }
 
-      function showInfo(data, textBox, showPara, rectX){
-
-        if (showPara == 1){
+      function showInfo(textBox,rectX){
+        if (showPara == 1 || showPara == 3){
+          d3.select(".textBox")
+            .style("display", "block")
           d3.select(".textNr")
-            .text("Nr.:" + data.id);
+            .text("Nr.:" + dataset[activeId].id);
           d3.select(".textNr")
-            .text("Nr.:" + data.id);
+            .text("Nr.:" + dataset[activeId].id);
           d3.select(".textInfo")
-            .text("Sterne: "+ data.rating + "\n" + data.infoText);
-          textStyle(textBox,rectX);
+            .text("Sterne: "+ dataset[activeId].rating + "\n" + dataset[activeId].infoText);
+          if (showPara != 2) {
+            textStyle(textBox,rectX,250);
+          }
         }
         else if(showPara == 0){
+         console.log("i dont care "+showPara);
+          d3.select(".textBox")
+            .style("display", "none")
           d3.select(".textNr")
             .text("");
           d3.select(".textInfo")
@@ -328,32 +388,83 @@
         }
       }
 
-      function textStyle(textBox, rectX) {
+      function textStyle(textBox,rectX,delay) {
         if(rectX < 400) {
           textBox.transition()
-            .duration(180)
-            .style("width", "800px")
-            .style("height", "200px")
-            .style("margin-left", 25+"px");
+            .duration(delay)
+            .style("margin-left", 17+"px");
         } else if (rectX > (w-400)) {
-          textBox.transition()
-            .duration(180)
-            .style("width", "800px")
-            .style("height", "200px")
-            .style("margin-left", (w-800+25)+"px");
+         textBox.transition()
+            .duration(delay)
+            .style("margin-left", (w-800+7)+"px");
         } else {
           textBox.transition()
-            .duration(180)
-            .style("width", "800px")
-            .style("height", "200px")
-            .style("margin-left", (rectX-400+25)+"px");
+            .duration(delay)
+            .style("margin-left", (rectX-400+17)+"px");
         }
       };
+      
+      function drawAnswers(answerSet,id){
+        //setup the right answers
+        var subSet = [];
+        answerSet.forEach(function(d,i) {
+          if (d.ref == id){
+            subSet.push(d);
+          }
+        });
+        //setup sizes and colors
+        var maxW = 0;
+        subSet.forEach(function(d,i) {
+          d["id"] = i;
+          maxW += mapTo(d.helpAvg);
+        });
+
+        var w_tmp = 0;
+        var aCorrect = 0;
+        subSet.forEach(function(d) {
+          w_tmp += mapToTextBox(d.helpAvg,maxW,aCorrect);
+        });
+        
+        if (w_tmp > 800){
+          aCorrect = (w_tmp - 800);
+        }else if (w_tmp < 800){
+          aCorrect = (w_tmp - 800);
+        }
+        
+
+        console.log(subSet);
+        
+        // draw
+        //var answerSVG = d3.select(".answerChart")
+         //           .append("svg")
+          //          .attr("width", 800)
+         //           .attr("height", h+10);
+        //var answers = barSVG.selectAll("rect")
+        //                 .data(subSet)
+        //                 .enter()
+        //                 .append("rect");
+        
+        //answers.attr("id", function(d,i) { return "aR" + i; })
+        //      .attr("x", function(d,i) { return posArray[i].x })
+        //      .attr("y", 0)
+        //      .attr("width", function(d,i) { return posArray[i].width })
+         //     .attr("height", h)
+        //      .attr("stroke", "white")
+        //      .attr("fill", function(d) {return colScl(d.helpAvg);})
+         //     .on("mouseover",  function(d,i) {
+      }
 
       function mapToScreen(val) {
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
 								  .range([1,w-correct]);
+        return m(mapTo(val));
+      }
+      
+      function mapToTextBox(val,maxW,aCorrect) {
+        var m = d3.scale.linear()
+								  .domain([0,maxW])
+								  .range([1,800-aCorrect]);
         return m(mapTo(val));
       }
 
@@ -363,19 +474,8 @@
                   .range([1,10]);
         return s(val);
       }
-      
-      function fishScl(val) {
-        return fisheyeScale(mapTo(val));
-      }
-      
-      function setupFish(){
-        fisheyeScale = d3.fisheye
-                         .scale(d3.scale.linear)
-                         .domain([0,totalWidth])
-                         .range([1,w-correct]);
-      }
 
-      var sortBars = function(posArray,svg,buttonState) {
+      var sortBars = function(posArray,svg,buttonState,textBox) {
         curWidth = 0;
 
         if(buttonState == 1) {
@@ -394,8 +494,15 @@
             posArray.sort(function(a,b) {
             return b.id - a.id;
           });
+        } else if (buttonState == 3) {
+            posArray.sort(function(a,b) {
+            return a.stars - b.stars;
+          });
+        } else if (buttonState == -3) {
+            posArray.sort(function(a,b) {
+            return b.stars - a.stars;
+          });
         }
-
 
         posArray.forEach(function(d,i) {
           var w_tmp = posArray[i].width;
@@ -407,11 +514,27 @@
              .attr("x", function(d) {
                 return posArray[i].x;
               });
+             //.attr("fill", function(d,i) {
+             //   return ("rgb("+(d.rating* 40)+","+(d.rating*40)+",0)")
+             //});
         });
+        var rectX = findByID(posArray,activeId).x;
+        var width = findByID(posArray,activeId).width;
+        var x1 = parseFloat(rectX) + parseFloat(width/2);
+        console.log("x = " + x1);
+        if(showPara == 2 || showPara == 3){
+          svg.select("#p")
+              .transition()
+              .duration(1000)
+              .style("fill", "#66CCFF")
+              .style("stroke", "#66CCFF")
+              .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+        }
+        textStyle(textBox,rectX,1000);
       }
 
       function changeMarkerState(svg,marker,buttonState,buttonID) {
-        console.log(buttonID);
+        //console.log(buttonID);
         var points = svg.select("#m"+buttonID).attr("points");
         var pntArray = points.split(",").map(Number);
 
@@ -423,6 +546,27 @@
              .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");
         }
       }
+      
+      function firstVisitInit(textBox) {
+        var width = findByID(posArray,activeId).width;
+        var x = findByID(posArray,activeId).x;
+        var x1 = parseFloat(x) + parseFloat(width/2);
+        d3.select(".barChart")
+              .select("#r"+parseInt(activeId))
+              .transition()
+              .duration(100)
+              .attr("fill", "#66CCFF");
+        showInfo(textBox,x);
+        textStyle(textBox,x,250);
+  
+        d3.select(".barChart")
+          .select("#p")
+          .transition()
+          .duration(100)
+          .style("fill", "#66CCFF")
+          .style("stroke", "#66CCFF")
+          .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+      }
 
       function findByID(src,id) {
         return src.filter( function(obj) {
@@ -431,15 +575,5 @@
       }
 
     </script>
-
-    <script>
-		  $(document).ready(function(){
-			  $(".main").onepage_scroll({
-				sectionContainer: "section",
-				responsiveFallback: 600,
-				loop: false
-				});
-		  });
-		</script>
   </body>
 </html>
