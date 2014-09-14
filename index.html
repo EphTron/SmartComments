@@ -39,12 +39,12 @@
                 <div class="textInfo"></div>
                 <div class="textHelp"></div>
                 <div class="answerChart"></div>
-              </div>
-              <div class ="answerBox">
-                <div class="textNr"></div>
-                <div class="textAuthor"></div>
-                <div class="textInfo"></div>
-                <div class="textHelp"></div>
+                <div class ="answerBox" style="display:none">
+                  <div class="aTextNr"></div>
+                  <div class="aTextAuthor"></div>
+                  <div class="aTextInfo"></div>
+                  <div class="aTextHelp"></div>
+                </div>
               </div>
           </div>
       </div>
@@ -65,12 +65,14 @@
       var clicked = 1;
       var mostHelpfulId = 0;
       var activeId = 0;
+      var activeAId = 0;
       var showPara = 3;
       var dataset = [];
       var answerSet = [];
       var aMinHelpAvg = 0;
       var aMaxHelpAvg = 0;
-      // TO DO today: addButton; answer visualization; write down some answers; activeButton color; fisheye;
+      var aShowPara = 0;
+      // TO DO today: addButton; answer visualization; write down some answers; activeButton color;
       // TO DO general: add barchartdiagramm; add brushing and linkin; adjust text style;
       d3.csv("leatherAnswers.csv", function(error,data){
         if(error) {
@@ -97,7 +99,7 @@
         } else {
 
           dataset = data;
-          console.log(answerSet);
+          ///console.log(answerSet);
           //dataset.push({id:dataset.length,
           //  ref: "XX",
           //  product:"B00",
@@ -120,7 +122,7 @@
             return parseInt(d.helpAvg)
           });
           
-          console.log(dataset);
+          //console.log(dataset);
           dataset.forEach(function(d) {
             totalWidth += mapTo(d.helpAvg);
           });
@@ -198,7 +200,7 @@
                               .data(buttArray)
                               .enter()
                               .append("polygon");
-                              
+                           
         var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer];
         return values;
       }
@@ -366,12 +368,12 @@
       function showInfo(textBox,rectX){
         if (showPara == 1 || showPara == 3){
           d3.select(".textBox")
-            .style("display", "block")
-          d3.select(".textNr")
+            .style("display", "block");
+          d3.select(".textBox")
+            .select(".textNr")
             .text("Nr.:" + dataset[activeId].id);
-          d3.select(".textNr")
-            .text("Nr.:" + dataset[activeId].id);
-          d3.select(".textInfo")
+          d3.select(".textBox")
+            .select(".textInfo")
             .text("Sterne: "+ dataset[activeId].rating + "\n" + dataset[activeId].infoText);
           if (showPara != 2) {
             textStyle(textBox,rectX,250);
@@ -380,10 +382,12 @@
         else if(showPara == 0){
          console.log("i dont care "+showPara);
           d3.select(".textBox")
-            .style("display", "none")
-          d3.select(".textNr")
+            .style("display", "none");
+          d3.select(".textBox")
+            .select(".textNr")
             .text("");
-          d3.select(".textInfo")
+          d3.select(".textBox")
+            .select(".textInfo")
             .text("");
         }
       }
@@ -404,52 +408,161 @@
         }
       };
       
+      function answerStyle(textBox,rectX,delay) {
+        if(rectX < 200) {
+          textBox.transition()
+            .duration(delay)
+            .style("margin-left", 0+"px");
+        } else if (rectX > (600)) {
+         textBox.transition()
+            .duration(delay)
+            .style("margin-left", (400)+"px");
+        } else {
+          textBox.transition()
+            .duration(delay)
+            .style("margin-left", (rectX-200)+"px");
+        }
+      };
+      
       function drawAnswers(answerSet,id){
         //setup the right answers
         var subSet = [];
         answerSet.forEach(function(d,i) {
           if (d.ref == id){
             subSet.push(d);
-            console.log(subSet);
           }
         });
-        //setup sizes and colors
-        var maxW = 0;
-        subSet.forEach(function(d,i) {
+         subSet.forEach(function(d,i) {
           d["id"] = i;
-          maxW += mapTo(d.helpAvg);
         });
-
-        var w_tmp = 0;
-        var aCorrect = 0;
-        subSet.forEach(function(d) {
-          w_tmp += mapToTextBox(d.helpAvg,maxW,aCorrect);
-        });
-        if (w_tmp > 800){
-          aCorrect = (w_tmp - 800);
-        }else if (w_tmp < 800){
-          aCorrect = (w_tmp - 800);
-        }
+        //setup sizes and colors
+        var aW = (780/subSet.length);
         console.log(subSet);
         
         // draw
+        var answerBox = d3.select(".smartComments")
+                          .select(".textBox")
+                          .select(".answerBox");
+        
         var answerSVG = d3.select(".answerChart")
                     .append("svg")
                     .attr("width", 780)
-                    .attr("height", 150);
+                    .attr("height", 60);
         var answers = answerSVG.selectAll("rect")
                          .data(subSet)
                          .enter()
                          .append("rect");
+
+        var ansPointer = answerSVG.append("polygon")
+        
+        ansPointer.attr("id", "aP")
+                  .style("fill", "white")
+                  .style("stroke", "white");
         
         answers.attr("id", function(d,i) { return "aR" + i; })
-              .attr("x", function(d,i) { return i* 133 })
-              .attr("y", 00)
-              .attr("width", function(d,i) { return 132 })
+              .attr("x", function(d,i) { return aW*i })
+              .attr("y", 0)
+              .attr("width", function(d,i) { return aW })
               .attr("height", h)
               .attr("stroke", "white")
-              .attr("fill", "lightgrey");
-              
+              .attr("fill", "lightgrey")
+              .on("mouseover",  function(d,i) {
+                if(aShowPara != 2){
+                  aShowPara = 1;
+                  activeAId = d.id;
+                  var rectX = aW*i;
+                  var x1 = parseFloat(rectX)+parseFloat(aW/2);
+                  showAnswer(subSet,answerBox,rectX);
+                  console.log("AR = " + parseInt(d.id));
+                  answerSVG.select("#aR"+parseInt(d.id))
+                      .transition()
+                      .duration(100)
+                      .attr("fill", "#66CCFF");
+
+                  answerSVG.select("#aP")
+                        .transition()
+                        .duration(100)
+                        .style("fill", "#66CCFF")
+                        .style("stroke", "#66CCFF")
+                        .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+                }
+            })
+            .on("mouseout",function (d) {
+              if(aShowPara != 2){
+                
+                answerSVG.select("#aR"+parseInt(d.id))
+                   .transition()
+                   .duration(100)
+                   .attr("fill", "lightgray");
+                answerSVG.select("#aP")
+                      .transition()
+                      .duration(50)
+                      .style("fill", "white")
+                      .style("stroke", "white");
+                aShowPara = 0;
+                activeAId = d.id;
+                showAnswer(subSet,answerBox);
+              }
+            })
+            .on("click", function (d) {
+              if (aShowPara == 1 || aShowPara == 0){
+                aShowPara = 2;
+                activeAId = d.id;
+                console.log("clicked ->"+ aShowPara);
+              } else if (aShowPara == 2){
+                answerSVG.select("#aR"+parseInt(activeId))
+                 .transition()
+                 .duration(100)
+                 .attr("fill", "lightgray");
+                 //.attr("fill", colScl(subSet[activeAId].helpAvg));
+
+                aShowPara = 1;
+                activeId = d.id;;
+                console.log("clicked again ..."+aShowPara);
+                
+                var rectX = aW*d.id;
+                showAnswer(subSet,answerBox,rectX);
+                answerSVG.select("#aR"+parseInt(d.id))
+                  .transition()
+                  .duration(100)
+                  .attr("fill", "#66CCFF");
+
+                var x1 = parseFloat(rectX) + parseFloat(aW/2);
+                answerSVG.select("#aP")
+                      .transition()
+                      .duration(100)
+                      .style("fill", "#66CCFF")
+                      .style("stroke", "#66CCFF")
+                      .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+              }
+            });
+      }
+      
+      function showAnswer(subSet,textHandle,rectX){
+        if (aShowPara == 1){
+          d3.select(".answerBox")
+            .style("display", "block");
+          d3.select(".answerBox")
+            .select(".aTextNr")
+            .text("Nr.:" + subSet[activeAId].id);
+          d3.select(".answerBox")
+            .select(".aTextInfo")
+            .text("Says:" + subSet[activeAId].infoText);
+          if (aShowPara != 2) {
+            answerStyle(textHandle,rectX,250);
+          }
+        }
+        else if(aShowPara == 0){
+         console.log("i dont care "+aShowPara);
+          d3.select(".answerBox")
+            .style("display", "none");
+          d3.select(".answerBox")
+            .select(".aTextNr")
+            .text("");
+          d3.select(".answerBox")
+            .select(".aTextInfo")
+            .text("");
+        }
       }
 
       function mapToScreen(val) {

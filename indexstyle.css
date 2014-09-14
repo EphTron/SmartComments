@@ -65,8 +65,7 @@ body {
 }
 
 .answerChart{
-  height: 200;
-
+  height: 60;
 }
 
 .textBox{
@@ -85,8 +84,24 @@ body {
   /* border-image: linear-gradient(to bottom, #66CCFF, rgba(255, 255, 255, 0)) 1 100%; */
 }
 
+.answerBox{
+  margin-left: 25px;
+  width: 400px;
+  height: 210px;
+  background-image: linear-gradient(lightgray 0%, white 50%);
+  border-width: 5px;
+  border-style: solid;
+  -webkit-border-image: -webkit-gradient(linear, 0 0, 0 100%, from(#66CCFF), to(rgba(255, 255, 255, 0))) 1 100%;
+  -webkit-border-image: -webkit-linear-gradient(#66CCFF, rgba(255, 255, 255, 0)) 1 100%;
+  -moz-border-image: -moz-linear-gradient(#66CCFF, rgba(255, 255, 255, 0)) 1 100%;
+  -o-border-image: -o-linear-gradient(#66CCFF, rgba(255, 255, 255, 0)) 1 100%;
+  border-bottom-style:none;
+  border-bottom-color: white;
+  /* border-image: linear-gradient(to bottom, #66CCFF, rgba(255, 255, 255, 0)) 1 100%; */
+}
+
 .textInfo{
 overflow-y:auto;
   width: 800px;
-  height: 200px;
+  height: 150px;
 }
