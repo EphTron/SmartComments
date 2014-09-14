@@ -2,49 +2,33 @@
 <meta charset="utf-8">
 <style>
 
-.bar {
-  fill: steelblue;
-}
 
-.bar:hover {
-  fill: brown;
-}
-
-.axis {
-  font: 10px sans-serif;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.x.axis path {
-  display: none;
-}
 
 </style>
 <body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="d3/d3.v3.js"></script>
 <script>
   
   var sortArray = [];
 
   var dataset;
   d3.csv("tent.csv", type, function(error, data) {
+    
     dataset=data;
-
+    var timeFormat = d3.time.format("%B %d, %Y");
+    
     data.forEach(function(d) { 
       d.id = d.id;
       d.rating = +d.rating;
+      d.dateFormat = timeFormat.parse(d.date);
     });
 
-    var timeFormat = d3.time.format("%B %d, %Y");
-    data.forEach(function(d,i) {
-      sortArray.push({id: d.id, stars: d.rating, date: d.date});
-    });
+    data.forEach(function(d) { 
+      return sortArray.push({id: d.id, stars: d.rating, dateLabel: d.date, date: timeFormat.parse(d.date)});
+    })
+
+    sortArray.sort(function(a,b) { return a.date-b.date })
+
     drawBarchart(data,sortArray);
   });
 
@@ -52,34 +36,38 @@ function drawBarchart(data,sortArray) {
   
   var margin = {top: 20, right: 20, bottom: 30, left: 40},
       width = window.innerWidth - margin.left - margin.right,
-      height = 300 - margin.top - margin.bottom;
+      height = 200 - margin.top - margin.bottom;
 
 
   var x = d3.scale.ordinal()
-      .rangeRoundBands([0, width], .1);
+            .rangeRoundBands([0, width], .1);
       
   var y = d3.scale.linear()
-      .range([height, 0]);
+            .range([height, 0]);
 
   var svg = d3.select("body")
               .append("svg")
               .attr("width", width + margin.left + margin.right)
-              .attr("height", height + margin.top + margin.bottom)
+              .attr("height", 50+ height + margin.top + margin.bottom)
               .append("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+              .attr("transform", "translate("+ margin.left + "," + margin.top + ")");
+
+  var bar = svg.selectAll("rect")
+               .data(data)
+               .enter()
+               .append("rect"); 
 
   var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom");
+                    .scale(x)
+                    .orient("bottom");
 
   var yAxis = d3.svg.axis()
-      .scale(y)
-      .orient("left")
-      .ticks(6);
-
+                    .scale(y)
+                    .orient("left")
+                    .ticks(6);
 	
-  x.domain(data.map(function(d) { return d.id; }));
-  y.domain([0, d3.max(data, function(d) { return d.rating; })]);
+  x.domain(data.map(function(d,i) { return sortArray[i].id; }));
+  y.domain([0, d3.max(data, function(d,i) { return sortArray[i].stars; })]);
 
   svg.append("g")
       .attr("class", "x axis")
@@ -91,7 +79,10 @@ function drawBarchart(data,sortArray) {
       .attr("dy", ".15em")
       .attr("transform", function(d) {
         return "rotate(-45)" 
-       });
+       })
+      .text(function(d,i) {
+        return sortArray[i].dateLabel;
+      })
 
   svg.append("g")
       .attr("class", "y axis")
@@ -103,15 +94,20 @@ function drawBarchart(data,sortArray) {
       .style("text-anchor", "end")
       .text("Stars");
 
-  svg.selectAll(".bar")
-      .data(data)
-      .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d) { return x(d.id); })
+  bar.attr("id", function(d,i) { return "#b1"+i })
+      .attr("x", function(d,i) {
+        return x(sortArray[i].id);
+      })
       .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.rating); })
-      .attr("height", function(d) { return height - y(d.rating); });
-
+      .attr("y", function(d,i) { return y(sortArray[i].stars); })
+      .attr("height", function(d,i) { return height - y(sortArray[i].stars); })
+      .attr("fill", "steelblue")
+      .on("mouseover", function(d,i) {
+        svg.select("b1"+i)
+           .transition()
+           .duration(200)
+           .attr("fill", "red" )
+      })
 }
 
 function type(d) {

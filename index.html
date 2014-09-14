@@ -31,10 +31,9 @@
         <section class="page2">
           <div class="smartComments">
               <h4>Kundenrezensionen</h4>
-              <div class="sortButtons" unselectable="yes" onselectstart="return false">
-              </div>
-              <div class="barChart">
-              </div>
+              <div class="barChart"></div>
+              <div class="sortButtons" unselectable="yes" onselectstart="return false"></div>
+              <div class="horizontalChart"></div>
               <div class="textBox">
                 <div class="textNr"></div>
                 <div class="textAuthor"></div>
@@ -63,7 +62,7 @@
       var clicked = 1;
 
       var dataset;
-      d3.csv("kindle.csv", function(error,data){
+      d3.csv("tent.csv", function(error,data){
         if(error) {
           console.log(error);
         } else {
@@ -96,20 +95,28 @@
             correct = (w_tmp - w);
           }
 
+          var timeFormat = d3.time.format("%B %d, %Y");
           dataset.forEach(function(d,i) {
-            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), x: curWidth, stars: ((d.rating*100)+(mapTo(d.helpAvg))+(d.id/1000))});
+            posArray.push({id: d.id, 
+                           width: mapToScreen(d.helpAvg),
+                           x: curWidth,
+                           stars: ((d.rating*100)+(mapTo(d.helpAvg))+(d.id/1000)),
+                           dateLabel: d.date,
+                           date: timeFormat.parse(d.date) });
             curWidth += mapToScreen(d.helpAvg);
           });
           var setupData = [];
           setupData = setup(data);
 
           draw(dataset,posArray,setupData);
+          drawBarchart(data,posArray)
         }
       });
 
       function setup(data) {
-        //bar setup
-        var barSVG = d3.select(".barChart")
+
+        //horizontal chart setup
+        var barSVG = d3.select(".horizontalChart")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h + 10);
@@ -130,7 +137,7 @@
 
         //button setup
         var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
-                         {id:1 ,state:"sort by: number",  value:2},
+                         {id:1 ,state:"sort by: date",  value:2},
                          {id:2 ,state:"sort by: stars",   value:3},
                          {id:3 ,state:"none",    value:4},
                          {id:4 ,state:"none",    value:5}];
@@ -156,7 +163,27 @@
                               .enter()
                               .append("polygon");
 
-        var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer];
+        //bar chart setup
+        var margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = window.innerWidth - margin.left - margin.right,
+            height = 100 - margin.top - margin.bottom;
+
+        var barSVGh = d3.select(".barChart")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", 50+ height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate("+ margin.left + "," + margin.top + ")");
+
+        var xScale = d3.scale.ordinal()
+                       .rangeRoundBands([0, width], .1);
+                
+        var yScale = d3.scale.linear()
+                       .range([height, 0]);
+
+
+
+        var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer,barSVGh,xScale,yScale];
         return values;
       }
 
@@ -255,6 +282,84 @@
                });
       }
 
+
+      function drawBarchart(data,sortArray) {
+        
+        var margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = window.innerWidth - margin.left - margin.right,
+            height = 100 - margin.top - margin.bottom;
+
+        var xScale = d3.scale.ordinal()
+                  .rangeRoundBands([0, width], .1);
+            
+        var yScale = d3.scale.linear()
+                  .range([height, 0]);
+
+        var barSVGh = d3.select(".barChart")
+                    .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", 50+ height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate("+ margin.left + "," + margin.top + ")");
+
+        var bar = barSVGh.selectAll("rect")
+                     .data(data)
+                     .enter()
+                     .append("rect"); 
+
+        var xAxis = d3.svg.axis()
+                          .scale(xScale)
+                          .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+                          .scale(yScale)
+                          .orient("left")
+                          .ticks(6);
+        
+        xScale.domain(data.map(function(d,i) { return sortArray[i].id; }));
+        yScale.domain([0, d3.max(data, function(d,i) { return sortArray[i].stars; })]);
+
+        barSVGh.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+              return "rotate(-45)" 
+             })
+            .text(function(d,i) {
+              return sortArray[i].dateLabel;
+            })
+
+        barSVGh.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Stars");
+
+        bar.attr("id", function(d,i) { return "#b1"+i })
+            .attr("x", function(d,i) {
+              return xScale(sortArray[i].id);
+            })
+            .attr("width", xScale.rangeBand())
+            .attr("y", function(d,i) { return yScale(sortArray[i].stars); })
+            .attr("height", function(d,i) { return height - yScale(sortArray[i].stars); })
+            .attr("fill", "steelblue")
+            .on("mouseover", function(d,i) {
+              svg.select("b1"+i)
+                 .transition()
+                 .duration(200)
+                 .attr("fill", "red" )
+            })
+      }
+
       function showInfo(data, textBox, showPara, rectX){
 
         if (showPara == 1){
@@ -313,7 +418,7 @@
       var sortBars = function(posArray,svg,buttonState) {
         curWidth = 0;
 
-        if(buttonState == 1) {
+        if(buttonState == 1) { //sort by helpful
           posArray.sort(function(a,b) {
             return a.width - b.width;
           });
@@ -321,15 +426,15 @@
           posArray.sort(function(a,b) {
             return b.width - a.width;
           });
-        } else if(buttonState == 2) {
+        } else if(buttonState == 2) { //sort by date
           posArray.sort(function(a,b) {
-            return a.id - b.id;
+            return a.date - b.date;
           });
         } else if(buttonState == -2) {
           posArray.sort(function(a,b) {
-            return b.id - a.id;
+            return b.date - a.date;
           });
-        } else if (buttonState == 3) {
+        } else if (buttonState == 3) { //sort by stars
           posArray.sort(function(a,b) { 
             return a.stars - b.stars;
           })

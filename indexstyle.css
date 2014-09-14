@@ -60,7 +60,7 @@ body {
     user-select: none;
 }
  
-.barChart{
+.horizontalChart{
   height: 60px;
   background-color: white;
 }
@@ -73,3 +73,19 @@ body {
   background-image: linear-gradient(gold 0%, white 100%);
   /* //#9FBFD2 100%); */
 }
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
