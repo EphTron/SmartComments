@@ -29,7 +29,7 @@
               <h4>Kundenrezensionen</h4>
               <div class="sortButtons" unselectable="yes" onselectstart="return false">
               </div>
-              <div class="sortLegend">test</div>
+              <div class="sortLegend"></div>
               <div class="barChart">
               </div>
               <div class="textBox">
@@ -141,7 +141,7 @@
           }
 
           dataset.forEach(function(d,i) {
-            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), stars: (d.rating*100)+(mapTo(d.helpAvg))+(d.id/1000), x: curWidth});
+            posArray.push({id: d.id, width: mapToScreen(d.helpAvg), stars: (d.rating*1000)+(mapTo(d.helpAvg))+(d.id/1000),rating: d.rating, x: curWidth});
             curWidth += mapToScreen(d.helpAvg);
             if (parseInt(d.helpAvg) > parseInt(dataset[mostHelpfulId].helpAvg)) {
               mostHelpfulId = d.id;
@@ -173,7 +173,7 @@
 
         var colorScale = d3.scale.linear()
                            .domain([minHelpAvg,0,maxHelpAvg])
-                           .range(["#CEB8B8","lightgray","green"]);
+                           .range(["#D37575","lightgray","green"]);
 
         //button setup
         var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
@@ -208,7 +208,6 @@
       }
 
       function draw(data,posArray,setupData) {
-        
 
         var buttonSVG = setupData[0];
         var barSVG    = setupData[1];
@@ -240,7 +239,6 @@
                    .transition()
                    .duration(100)
                    .attr("fill", colScl(dataset[activeId].helpAvg));
-                drawAnswers(answerSet,activeId);
                 }
                 showPara = 1;
                 activeId = d.id;
@@ -266,7 +264,6 @@
             })
             .on("mouseout",function (d) {
               if(showPara != 2){
-                
                 barSVG.select("#r"+parseInt(d.id))
                    .transition()
                    .duration(100)
@@ -604,7 +601,7 @@
 
       var sortBars = function(posArray,svg,buttonState,textBox,delay) {
         curWidth = 0;
-        showSortLegend(activeButton,buttonState);
+        
         if(buttonState == 1) {
           posArray.sort(function(a,b) {
             return a.width - b.width;
@@ -645,6 +642,7 @@
              //   return ("rgb("+(d.rating* 40)+","+(d.rating*40)+",0)")
              //});
         });
+        showSortLegend(posArray,activeButton,buttonState);
         var rectX = findByID(posArray,activeId).x;
         var width = findByID(posArray,activeId).width;
         var x1 = parseFloat(rectX) + parseFloat(width/2);
@@ -660,24 +658,43 @@
         textStyle(textBox,rectX,delay);
       }
       
-      function showSortLegend(activeButton,buttonState){
-        var sortTyp3 = d3.select(".sortLegend")
-                        .append("div")
-                        .attr("id" ,"sorttyp3");
-        //var stars = d3.select(".sortLegend")
-        //            .append("svg")
-        //           .attr("width", w)
-        //            .attr("height", 30)
-        //            .append("polygon");
-        var star = d3.select(".sortLegend")
-                     .append("img")
-                     .attr("src" ,"./pictures/stars.png");
-        
+      function showSortLegend(posArray,activeButton,buttonState){
+        d3.select(".sortLegend").select("svg").remove();
+        partArray = [0,0,0,0,0];
+        posArray.forEach(function(d,i) {
+          if(posArray[i].rating == 5){
+            partArray[0] += posArray[i].width;
+          } else if (posArray[i].rating == 4){
+            partArray[1] += posArray[i].width;
+          } else if (posArray[i].rating == 3){
+            partArray[2] += posArray[i].width;
+          } else if (posArray[i].rating == 2){
+            partArray[3] += posArray[i].width;
+          } else if (posArray[i].rating == 1){
+            partArray[4] += posArray[i].width;
+          }
+        });
+        console.log(partArray);
+        var legend = d3.select(".sortLegend")
+          .append("svg")
+          .attr("width", w)
+          .attr("height", 15);
+        var borders = legend.selectAll("rect")
+          .data(partArray)
+          .enter()
+          .append("rect");
+        var parts = legend.selectAll("image")
+          .data(partArray)
+          .enter()
+          .append("svg:image");
+    
+          
         //refresh buttons
         d3.select(".sortButtons")
             .selectAll("rect")
             .style("fill","lightgray")
             .style("stroke", "black");
+            
         //mark selected button and show legend
         if (activeButton == 1){
           d3.select(".sortButtons")
@@ -690,27 +707,49 @@
             .select("#b" + (activeButton-1))
             .style("fill","#66CCFF")
             .style("stroke", "darkblue");
-        } else if (activeButton == 3){
+        } else if (buttonState == 3){
+          partArray.reverse();
           d3.select(".sortButtons")
             .select("#b" + (activeButton-1))
             .style("fill","#66CCFF")
             .style("stroke", "darkblue");
-            
-          d3.select(".sortLegend")
-                     .append("div")
-                     .attr("id" ,"sorttyp3")
-                     .append("div")
-                     .attr("id" ,"star4")
-                     .append("div")
-                     .attr("id" ,"star3")
-                     .append("div")
-                     .attr("id" ,"star2");
-          //stars.attr("points", CalculateStarPoints(5, 5, 5, 10, 5))
+          borders.attr("id", function(d,i) { return "rLeg" + i; })
+            .attr("x", function(d,i) { return legendX(partArray,i) })
+            .attr("y", -1)
+            .attr("width", function(d,i) { return (partArray[i]-1)})
+            .attr("height", 20)
+            .style("stroke", "black")
+            .style("fill","white");
+          parts.attr("id", function(d,i) { return "pLeg" + i; })
+            .attr("x", function(d,i) { return legendX(partArray,i) })
+            .attr("y", 0)
+            .attr("width", function(d,i) { return (partArray[i])})
+            .attr("height", 14)
+            .style("stroke", "black")
+            .attr("xlink:href",function(d,i){return "./pictures/"+(4-i)+"stars.png"} );
+        } else if (buttonState == -3){
+          d3.select(".sortButtons")
+            .select("#b" + (activeButton-1))
+            .style("fill","#66CCFF")
+            .style("stroke", "darkblue");
+          borders.attr("id", function(d,i) { return "rLeg" + i; })
+            .attr("x", function(d,i) { return legendX(partArray,i) })
+            .attr("y", -1)
+            .attr("width", function(d,i) { return (partArray[i]-1)})
+            .attr("height", 20)
+            .style("stroke", "black")
+            .style("fill","white");
+          parts.attr("id", function(d,i) { return "pLeg" + i; })
+            .attr("x", function(d,i) { return legendX(partArray,i) })
+            .attr("y", 0)
+            .attr("width", function(d,i) { return (partArray[i])})
+            .attr("height", 14)
+            .style("stroke", "black")
+            .attr("xlink:href",function(d,i){return "./pictures/"+i +"stars.png"} );
         }  
       }
 
       function changeMarkerState(svg,marker,buttonState,buttonID) {
-        //console.log(buttonID);
         var points = svg.select("#m"+buttonID).attr("points");
         var pntArray = points.split(",").map(Number);
 
@@ -720,6 +759,20 @@
         } else if (buttonState < 0) {
           svg.select("#m"+buttonID)
              .attr("transform", "rotate("+360+","+(pntArray[0]+5) +","+pntArray[5]+")");
+        }
+      }
+      
+      function legendX(partArray,i){
+        if (i == 0){
+          return 1;
+        }else if (i == 1) {
+          return (partArray[i-1]);
+        }else if (i == 2) {
+          return (partArray[0])+(partArray[i-1]);
+        }else if (i == 3) {
+          return (partArray[0])+(partArray[1])+(partArray[i-1]);
+        }else if (i == 4) {
+          return (partArray[0])+(partArray[1])+(partArray[2])+(partArray[i-1]);
         }
       }
       
@@ -767,7 +820,6 @@
             results += ", " + currX + "," + currY;
           }
         }
-         
         return results;
       }
     </script>

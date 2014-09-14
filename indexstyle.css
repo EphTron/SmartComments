@@ -109,3 +109,46 @@ overflow-y:auto;
   width: 800px;
   height: 150px;
 }
+#rLeg0{
+  border-color: black;
+  border-style: solid;
+  border-left-style: solid;
+  border-bottom-style:none;
+  border-top-style:none;
+  
+}
+#rLeg1{
+  border-color: gold;
+  border-style: solid;
+  border-bottom-style:none;
+  border-top-style:none;
+  border-left-style: solid
+}
+#rLeg2{
+  border-color: gold;
+  border-style: solid;
+  border-bottom-style:none;
+  border-top-style:none;
+}
+#rLeg3{
+  border-color: gold;
+  border-style: solid;
+  border-bottom-style:none;
+  border-top-style:none;
+}
+#rLeg4{
+border-color: gold; 
+  border-style: solid;
+  border-bottom-style:none;
+  border-top-style:none;
+}
+
+
+
+
+
+
+
+
+
+
