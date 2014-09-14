@@ -599,7 +599,7 @@
         return s(val);
       }
 
-      var sortBars = function(posArray,svg,buttonState,textBox,delay) {
+      function sortBars(posArray,svg,buttonState,textBox,delay) {
         curWidth = 0;
         
         if(buttonState == 1) {
@@ -660,7 +660,7 @@
       
       function showSortLegend(posArray,activeButton,buttonState){
         d3.select(".sortLegend").select("svg").remove();
-        partArray = [0,0,0,0,0];
+        var partArray = [0,0,0,0,0];
         posArray.forEach(function(d,i) {
           if(posArray[i].rating == 5){
             partArray[0] += posArray[i].width;
@@ -674,21 +674,10 @@
             partArray[4] += posArray[i].width;
           }
         });
-        console.log(partArray);
         var legend = d3.select(".sortLegend")
           .append("svg")
           .attr("width", w)
-          .attr("height", 15);
-        var borders = legend.selectAll("rect")
-          .data(partArray)
-          .enter()
-          .append("rect");
-        var parts = legend.selectAll("image")
-          .data(partArray)
-          .enter()
-          .append("svg:image");
-    
-          
+          .attr("height", 18);
         //refresh buttons
         d3.select(".sortButtons")
             .selectAll("rect")
@@ -696,13 +685,35 @@
             .style("stroke", "black");
             
         //mark selected button and show legend
-        if (activeButton == 1){
+        if (buttonState == -1){
+          partArray = [50,w-100];
           d3.select(".sortButtons")
             .select("#b" + (activeButton-1))
             .style("fill","#66CCFF")
             .style("stroke", "darkblue");
+          legend.selectAll("image").data(partArray).enter().append("svg:image")
+            .attr("id", function(d,i) { return "help" + i; })
+            .attr("x", function(d,i) { return partArray[i] })
+            .attr("y", 0)
+            .attr("width", 50 )
+            .attr("height", 20)
+            .style("stroke", "black")
+            .attr("xlink:href",function(d,i){return "./pictures/"+i+"help.png"} );
+        }else if (buttonState == 1){
+          partArray = [w-100,50];
           d3.select(".sortButtons")
-        } else if (activeButton == 2){
+            .select("#b" + (activeButton-1))
+            .style("fill","#66CCFF")
+            .style("stroke", "darkblue");
+          legend.selectAll("image").data(partArray).enter().append("svg:image")
+            .attr("id", function(d,i) { return "help" + i; })
+            .attr("x", function(d,i) { return partArray[i] })
+            .attr("y", 0)
+            .attr("width", 50 )
+            .attr("height", 20)
+            .style("stroke", "black")
+            .attr("xlink:href",function(d,i){return "./pictures/"+i+"help.png"} );
+        } else if (buttonState == 2){
           d3.select(".sortButtons")
             .select("#b" + (activeButton-1))
             .style("fill","#66CCFF")
@@ -713,14 +724,16 @@
             .select("#b" + (activeButton-1))
             .style("fill","#66CCFF")
             .style("stroke", "darkblue");
-          borders.attr("id", function(d,i) { return "rLeg" + i; })
+          legend.selectAll("rect").data(partArray).enter().append("rect")
+            .attr("id", function(d,i) { return "rLeg" + i; })
             .attr("x", function(d,i) { return legendX(partArray,i) })
             .attr("y", -1)
             .attr("width", function(d,i) { return (partArray[i]-1)})
             .attr("height", 20)
             .style("stroke", "black")
             .style("fill","white");
-          parts.attr("id", function(d,i) { return "pLeg" + i; })
+          legend.selectAll("image").data(partArray).enter().append("svg:image")
+            .attr("id", function(d,i) { return "pLeg" + i; })
             .attr("x", function(d,i) { return legendX(partArray,i) })
             .attr("y", 0)
             .attr("width", function(d,i) { return (partArray[i])})
@@ -732,14 +745,16 @@
             .select("#b" + (activeButton-1))
             .style("fill","#66CCFF")
             .style("stroke", "darkblue");
-          borders.attr("id", function(d,i) { return "rLeg" + i; })
+          legend.selectAll("rect").data(partArray).enter().append("rect")
+            .attr("id", function(d,i) { return "rLeg" + i; })
             .attr("x", function(d,i) { return legendX(partArray,i) })
             .attr("y", -1)
             .attr("width", function(d,i) { return (partArray[i]-1)})
             .attr("height", 20)
             .style("stroke", "black")
             .style("fill","white");
-          parts.attr("id", function(d,i) { return "pLeg" + i; })
+          legend.selectAll("image").data(partArray).enter().append("svg:image")
+            .attr("id", function(d,i) { return "pLeg" + i; })
             .attr("x", function(d,i) { return legendX(partArray,i) })
             .attr("y", 0)
             .attr("width", function(d,i) { return (partArray[i])})
@@ -801,26 +816,6 @@
         return src.filter( function(obj) {
           return +obj.id == id;
         })[0];
-      }
-      
-      function CalculateStarPoints(centerX, centerY, arms, outerRadius, innerRadius){
-        var results = "";
-        var angle = Math.PI / arms;
-        for (var i = 0; i < 2 * arms; i++){
-          // Use outer or inner radius depending on what iteration we are in.
-          var r = (i & 1) == 0 ? outerRadius : innerRadius;
-          var currX = centerX + Math.cos(i * angle) * r;
-          var currY = centerY + Math.sin(i * angle) * r;
-           
-          // Our first time we simply append the coordinates, subsequet times
-          // we append a ", " to distinguish each coordinate pair.
-          if (i == 0){
-            results = currX + "," + currY;
-          }else{
-            results += ", " + currX + "," + currY;
-          }
-        }
-        return results;
       }
     </script>
   </body>
