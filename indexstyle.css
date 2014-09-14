@@ -59,6 +59,10 @@ body {
     user-select: none;
 }
 
+.sortLegend{
+  height: 30;
+}
+
 .barChart{
   height: 60px;
   background-color: white;

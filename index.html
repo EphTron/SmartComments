@@ -29,6 +29,7 @@
               <h4>Kundenrezensionen</h4>
               <div class="sortButtons" unselectable="yes" onselectstart="return false">
               </div>
+              <div class="sortLegend">test</div>
               <div class="barChart">
               </div>
               <div class="textBox">
@@ -66,6 +67,7 @@
       var mostHelpfulId = 0;
       var activeId = 0;
       var activeAId = 0;
+      var activeButton = 3;
       var showPara = 3;
       var dataset = [];
       var answerSet = [];
@@ -171,7 +173,7 @@
 
         var colorScale = d3.scale.linear()
                            .domain([minHelpAvg,0,maxHelpAvg])
-                           .range(["red","lightgray","green"]);
+                           .range(["#CEB8B8","lightgray","green"]);
 
         //button setup
         var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
@@ -206,6 +208,7 @@
       }
 
       function draw(data,posArray,setupData) {
+        
 
         var buttonSVG = setupData[0];
         var barSVG    = setupData[1];
@@ -219,7 +222,6 @@
         var pointer   = setupData[9];
 
         var bCnt = buttArray.length; // buttonCount
-
         pointer.attr("id", "p")
                .style("fill", "white")
                .style("stroke", "white");
@@ -238,6 +240,7 @@
                    .transition()
                    .duration(100)
                    .attr("fill", colScl(dataset[activeId].helpAvg));
+                drawAnswers(answerSet,activeId);
                 }
                 showPara = 1;
                 activeId = d.id;
@@ -258,6 +261,7 @@
                       .style("fill", "#66CCFF")
                       .style("stroke", "#66CCFF")
                       .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+                drawAnswers(answerSet,d.id);
               }
             })
             .on("mouseout",function (d) {
@@ -275,10 +279,12 @@
                 showPara = 0;
                 activeId = d.id;
                 showInfo(textBox);
+                d3.select(".answerChart").select("svg").remove();
               }
             })
             .on("click", function (d) {
               if (showPara == 1 || showPara == 0){
+                d3.select(".answerChart").select("svg").remove();
                 showPara = 2;
                 activeId = d.id;
                 console.log("clicked ->"+ showPara);
@@ -309,11 +315,15 @@
                       .style("fill", "#66CCFF")
                       .style("stroke", "#66CCFF")
                       .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+                d3.select(".answerChart").select("svg").remove();
+                d3.select(".answerBox").style("display", "none");
+                aShowPara = 0;
               }
             });
         //set  position and color of marker and activeId rect on FIRST VISIT
+        
         firstVisitInit(textBox);
-
+        
         buttons.attr("id", function(d,i) { return "b"+i; })
                .attr("active", false)
                .attr("x", function(d,i) { return i*(w/bCnt); })
@@ -337,13 +347,14 @@
                     .attr("fill", "lightgrey");
                 })
                .on("click", function(d) {
+                  activeButton = d.value;
                   buttonSVG.select("#b"+parseInt(d.id))
                     .transition()
                     .duration(100)
-                    .attr("fill", "lightblue")
+                    .attr("fill", "red");
                   clicked = clicked*-1;
                   var buttonState = clicked*d.value;
-                  sortBars(posArray,barSVG,buttonState,textBox);
+                  sortBars(posArray,barSVG,buttonState,textBox,1000);
                   changeMarkerState(buttonSVG,marker,buttonState,d.id);
                 });
 
@@ -363,6 +374,7 @@
                           (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
                           (i*(w/bCnt)+(w/bCnt)-30)+","+13);
               });
+        sortBars(posArray,barSVG,-3,textBox,0);
       }
 
       function showInfo(textBox,rectX){
@@ -413,14 +425,14 @@
           textBox.transition()
             .duration(delay)
             .style("margin-left", 0+"px");
-        } else if (rectX > (600)) {
+        } else if (rectX > 600) {
          textBox.transition()
             .duration(delay)
-            .style("margin-left", (400)+"px");
+            .style("margin-left", (400- 8)+"px");
         } else {
           textBox.transition()
             .duration(delay)
-            .style("margin-left", (rectX-200)+"px");
+            .style("margin-left", (rectX-130)+"px");
         }
       };
       
@@ -432,60 +444,62 @@
             subSet.push(d);
           }
         });
-         subSet.forEach(function(d,i) {
-          d["id"] = i;
-        });
-        //setup sizes and colors
-        var aW = (780/subSet.length);
-        console.log(subSet);
-        
-        // draw
-        var answerBox = d3.select(".smartComments")
-                          .select(".textBox")
-                          .select(".answerBox");
-        
-        var answerSVG = d3.select(".answerChart")
-                    .append("svg")
-                    .attr("width", 780)
-                    .attr("height", 60);
-        var answers = answerSVG.selectAll("rect")
-                         .data(subSet)
-                         .enter()
-                         .append("rect");
+        if (subSet.length > 0){
+          subSet.forEach(function(d,i) {
+            d["id"] = i;
+          });
+      
+          //setup sizes and colors
+          var aW = (780/subSet.length);
+          console.log(subSet);
+          
+          // draw
+          var answerBox = d3.select(".smartComments")
+                            .select(".textBox")
+                            .select(".answerBox");
+          
+          var answerSVG = d3.select(".answerChart")
+                      .append("svg")
+                      .attr("width", 780)
+                      .attr("height", 60);
+          var answers = answerSVG.selectAll("rect")
+                           .data(subSet)
+                           .enter()
+                           .append("rect");
 
-        var ansPointer = answerSVG.append("polygon")
-        
-        ansPointer.attr("id", "aP")
-                  .style("fill", "white")
-                  .style("stroke", "white");
-        
-        answers.attr("id", function(d,i) { return "aR" + i; })
-              .attr("x", function(d,i) { return aW*i })
-              .attr("y", 0)
-              .attr("width", function(d,i) { return aW })
-              .attr("height", h)
-              .attr("stroke", "white")
-              .attr("fill", "lightgrey")
-              .on("mouseover",  function(d,i) {
-                if(aShowPara != 2){
-                  aShowPara = 1;
-                  activeAId = d.id;
-                  var rectX = aW*i;
-                  var x1 = parseFloat(rectX)+parseFloat(aW/2);
-                  showAnswer(subSet,answerBox,rectX);
-                  console.log("AR = " + parseInt(d.id));
-                  answerSVG.select("#aR"+parseInt(d.id))
+          var ansPointer = answerSVG.append("polygon")
+          
+          ansPointer.attr("id", "aP")
+                    .style("fill", "white")
+                    .style("stroke", "white");
+          
+          answers.attr("id", function(d,i) { return "aR" + i; })
+            .attr("x", function(d,i) { return aW*i })
+            .attr("y", 0)
+            .attr("width", function(d,i) { return aW })
+            .attr("height", h)
+            .attr("stroke", "white")
+            .attr("fill", "lightgrey")
+            .on("mouseover",  function(d,i) {
+              if(aShowPara != 2){
+                aShowPara = 1;
+                activeAId = d.id;
+                var rectX = aW*i;
+                var x1 = parseFloat(rectX)+parseFloat(aW/2);
+                showAnswer(subSet,answerBox,rectX);
+                console.log("AR = " + parseInt(d.id));
+                answerSVG.select("#aR"+parseInt(d.id))
+                    .transition()
+                    .duration(100)
+                    .attr("fill", "#66CCFF");
+
+                answerSVG.select("#aP")
                       .transition()
                       .duration(100)
-                      .attr("fill", "#66CCFF");
-
-                  answerSVG.select("#aP")
-                        .transition()
-                        .duration(100)
-                        .style("fill", "#66CCFF")
-                        .style("stroke", "#66CCFF")
-                        .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
-                }
+                      .style("fill", "#66CCFF")
+                      .style("stroke", "#66CCFF")
+                      .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+              }
             })
             .on("mouseout",function (d) {
               if(aShowPara != 2){
@@ -510,14 +524,14 @@
                 activeAId = d.id;
                 console.log("clicked ->"+ aShowPara);
               } else if (aShowPara == 2){
-                answerSVG.select("#aR"+parseInt(activeId))
+                answerSVG.select("#aR"+parseInt(activeAId))
                  .transition()
                  .duration(100)
                  .attr("fill", "lightgray");
                  //.attr("fill", colScl(subSet[activeAId].helpAvg));
 
                 aShowPara = 1;
-                activeId = d.id;;
+                activeAId = d.id;;
                 console.log("clicked again ..."+aShowPara);
                 
                 var rectX = aW*d.id;
@@ -529,13 +543,15 @@
 
                 var x1 = parseFloat(rectX) + parseFloat(aW/2);
                 answerSVG.select("#aP")
-                      .transition()
-                      .duration(100)
-                      .style("fill", "#66CCFF")
-                      .style("stroke", "#66CCFF")
-                      .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+                  .transition()
+                  .duration(100)
+                  .style("fill", "#66CCFF")
+                  .style("stroke", "#66CCFF")
+                  .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+                
               }
             });
+        }
       }
       
       function showAnswer(subSet,textHandle,rectX){
@@ -586,9 +602,9 @@
         return s(val);
       }
 
-      var sortBars = function(posArray,svg,buttonState,textBox) {
+      var sortBars = function(posArray,svg,buttonState,textBox,delay) {
         curWidth = 0;
-
+        showSortLegend(activeButton,buttonState);
         if(buttonState == 1) {
           posArray.sort(function(a,b) {
             return a.width - b.width;
@@ -621,7 +637,7 @@
           curWidth += w_tmp;
           svg.select("#r"+(posArray[i].id))
              .transition()
-             .duration(1000)
+             .duration(delay)
              .attr("x", function(d) {
                 return posArray[i].x;
               });
@@ -636,12 +652,61 @@
         if(showPara == 2 || showPara == 3){
           svg.select("#p")
               .transition()
-              .duration(1000)
+              .duration(delay)
               .style("fill", "#66CCFF")
               .style("stroke", "#66CCFF")
               .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
         }
-        textStyle(textBox,rectX,1000);
+        textStyle(textBox,rectX,delay);
+      }
+      
+      function showSortLegend(activeButton,buttonState){
+        var sortTyp3 = d3.select(".sortLegend")
+                        .append("div")
+                        .attr("id" ,"sorttyp3");
+        //var stars = d3.select(".sortLegend")
+        //            .append("svg")
+        //           .attr("width", w)
+        //            .attr("height", 30)
+        //            .append("polygon");
+        var star = d3.select(".sortLegend")
+                     .append("img")
+                     .attr("src" ,"./pictures/stars.png");
+        
+        //refresh buttons
+        d3.select(".sortButtons")
+            .selectAll("rect")
+            .style("fill","lightgray")
+            .style("stroke", "black");
+        //mark selected button and show legend
+        if (activeButton == 1){
+          d3.select(".sortButtons")
+            .select("#b" + (activeButton-1))
+            .style("fill","#66CCFF")
+            .style("stroke", "darkblue");
+          d3.select(".sortButtons")
+        } else if (activeButton == 2){
+          d3.select(".sortButtons")
+            .select("#b" + (activeButton-1))
+            .style("fill","#66CCFF")
+            .style("stroke", "darkblue");
+        } else if (activeButton == 3){
+          d3.select(".sortButtons")
+            .select("#b" + (activeButton-1))
+            .style("fill","#66CCFF")
+            .style("stroke", "darkblue");
+            
+          d3.select(".sortLegend")
+                     .append("div")
+                     .attr("id" ,"sorttyp3")
+                     .append("div")
+                     .attr("id" ,"star4")
+                     .append("div")
+                     .attr("id" ,"star3")
+                     .append("div")
+                     .attr("id" ,"star2");
+          //stars.attr("points", CalculateStarPoints(5, 5, 5, 10, 5))
+        }  
       }
 
       function changeMarkerState(svg,marker,buttonState,buttonID) {
@@ -684,7 +749,27 @@
           return +obj.id == id;
         })[0];
       }
-
+      
+      function CalculateStarPoints(centerX, centerY, arms, outerRadius, innerRadius){
+        var results = "";
+        var angle = Math.PI / arms;
+        for (var i = 0; i < 2 * arms; i++){
+          // Use outer or inner radius depending on what iteration we are in.
+          var r = (i & 1) == 0 ? outerRadius : innerRadius;
+          var currX = centerX + Math.cos(i * angle) * r;
+          var currY = centerY + Math.sin(i * angle) * r;
+           
+          // Our first time we simply append the coordinates, subsequet times
+          // we append a ", " to distinguish each coordinate pair.
+          if (i == 0){
+            results = currX + "," + currY;
+          }else{
+            results += ", " + currX + "," + currY;
+          }
+        }
+         
+        return results;
+      }
     </script>
   </body>
 </html>
