@@ -58,8 +58,9 @@
       var curWidth = 0;
       var correct = 0;
       var posArray = [];
-      var sortMode = 0;
+      var sortmode = 0;
       var clicked = 1;
+      var sortArray = [];
 
       var dataset;
       d3.csv("tent.csv", function(error,data){
@@ -101,15 +102,27 @@
                            width: mapToScreen(d.helpAvg),
                            x: curWidth,
                            stars: ((d.rating*100)+(mapTo(d.helpAvg))+(d.id/1000)),
-                           dateLabel: d.date,
                            date: timeFormat.parse(d.date) });
             curWidth += mapToScreen(d.helpAvg);
           });
+
+          dataset.forEach(function(d,i) {  
+            sortArray.push({id: d.id, 
+                            date: timeFormat.parse(d.date),
+                            dateLabel: d.date,
+                            stars: d.rating,
+                            helpAvg: d.helpAvg,
+                            x: 0
+                          });
+          })
+
+          // sortArray.sort(function(a,b) { return a.date-b.date });
+
           var setupData = [];
           setupData = setup(data);
 
-          draw(dataset,posArray,setupData);
-          drawBarchart(data,posArray)
+          draw(dataset,posArray,setupData,sortArray);
+          // drawBarchart(data,posArray)
         }
       });
 
@@ -175,19 +188,40 @@
                         .append("g")
                         .attr("transform", "translate("+ margin.left + "," + margin.top + ")");
 
+        var hBars = barSVGh.selectAll("rect")
+                         .data(data)
+                         .enter()
+                         .append("rect"); 
+
         var xScale = d3.scale.ordinal()
                        .rangeRoundBands([0, width], .1);
-                
+        
+        // var minDate = d3.min(sortArray,function(d) { return d.date });
+        // var maxDate = d3.max(sortArray,function(d) { return d.date });
+        // var xScale = d3.time.scale().domain([minDate,maxDate]).range([0,width]);
+
         var yScale = d3.scale.linear()
                        .range([height, 0]);
 
+        var xAxis = d3.svg.axis()
+                          .scale(xScale)
+                          .orient("bottom");
 
+        var yAxis = d3.svg.axis()
+                          .scale(yScale)
+                          .orient("left")
+                          .ticks(6);
 
-        var values = [buttonSVG,barSVG,bars,buttons,labels,buttArray,marker,textBox,colorScale,pointer,barSVGh,xScale,yScale];
+        //return values
+        var values = [buttonSVG,barSVG,bars,buttons,labels,
+                      buttArray,marker,textBox,colorScale,
+                      pointer,barSVGh,xScale,yScale,hBars,
+                      xAxis,yAxis,margin,width,height];
+        
         return values;
       }
 
-      function draw(data,posArray,setupData) {
+      function draw(data,posArray,setupData,sortArray) {
 
         var buttonSVG = setupData[0];
         var barSVG    = setupData[1];
@@ -199,14 +233,72 @@
         var textBox   = setupData[7];
         var colScl    = setupData[8];
         var pointer   = setupData[9];
+        var barSVGh   = setupData[10];
+        var xScale    = setupData[11];
+        var yScale    = setupData[12];
+        var hBars     = setupData[13];
+        var xAxis     = setupData[14];
+        var yAxis     = setupData[15];
+        var margin    = setupData[16];
+        var width     = setupData[17];
+        var height    = setupData[18];
 
         var bCnt = buttArray.length; // buttonCount
-        clickState=[0,0,0,0,0];
 
         pointer.attr("id", "p")
                .style("fill", "white")
                .style("stroke", "white"); 
 
+        // --- VERTICAL - BARCHART --------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
+        xScale.domain(sortArray.map(function(d,i) { return sortArray[i].id; }));
+        yScale.domain([0, d3.max(data, function(d,i) { return sortArray[i].stars; })]);
+
+
+        barSVGh.append("g")
+               .attr("class", "x axis foo")
+               .attr("transform", "translate(0," + height + ")")
+               .call(xAxis)
+               .selectAll("text")
+               .attr("dx", "-.8em")
+               .attr("dy", ".15em")
+               .style("text-anchor", "end")
+               .attr("transform", function(d) { return "rotate(-45)" })
+               // .text(function(d,i) { return sortArray[i].dateLabel });
+
+        barSVGh.append("g")
+               .attr("class", "y axis")
+               .call(yAxis)
+               .append("text")
+               .attr("transform", "rotate(-90)")
+               .attr("y", 6)
+               .attr("dy", ".71em")
+               .style("text-anchor", "end")
+               .text("Stars");
+
+        hBars.attr("id", function(d,i) { return "b"+sortArray[i].id })
+              .attr("x", function(d,i) {
+                 return xScale(sortArray[i].id);
+               })
+              .attr("width", xScale.rangeBand())
+              .attr("y", function(d,i) { return yScale(sortArray[i].stars); })
+              .attr("height", function(d,i) { return height - yScale(sortArray[i].stars); })
+              .attr("fill", "lightgrey")
+              .on("mouseover", function(d,i) {
+                barSVGh.select("#b"+i).attr("fill", "gold");
+                barSVG.select("#r"+i).attr("fill", "gold");
+               })
+              .on("mouseout", function(d,i) { 
+                barSVGh.select("#b"+i).attr("fill", "lightgrey");
+                barSVG.select("#r"+i).attr("fill", colScl(d.helpAvg));
+               })
+              .on("click", function(d,i) { 
+                sortmode += 1;
+                sortTimeline(sortArray,barSVGh,sortmode,xScale,width,height,xAxis);
+               });
+    
+        // --- HORIZONTAL - BARCHART ------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
         bars.attr("id", function(d,i) { return "r" + i; })
             .attr("x", function(d,i) { return posArray[i].x })
             .attr("y", 0)
@@ -235,8 +327,14 @@
                     .style("fill", "gold")
                     .style("stroke", "gold")
                     .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
+
+              barSVGh.select("#b"+i)
+                     .transition()
+                     .duration(150)
+                     .style("fill","gold");
+
             })
-            .on("mouseout",function (d) {
+            .on("mouseout",function (d,i) {
               barSVG.select("#r"+parseInt(d.id))
                  .transition()
                  .duration(150)
@@ -247,8 +345,16 @@
               barSVG.select("#p") 
                     .style("fill", "white")
                     .style("stroke", "white");
-            });
 
+              barSVGh.select("#b"+i)
+                     .transition()
+                     .duration(150)
+                     .style("fill","lightgrey");
+             });
+
+
+        // --- BUTTONS --------------------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
         buttons.attr("id", function(d,i) { return "b"+i; })
                .attr("x", function(d,i) { return i*(w/bCnt); })
                .attr("y", 0)
@@ -280,84 +386,6 @@
                           (i*(w/bCnt)+(w/bCnt)-40)+","+18+","+
                           (i*(w/bCnt)+(w/bCnt)-30)+","+13);
                });
-      }
-
-
-      function drawBarchart(data,sortArray) {
-        
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-            width = window.innerWidth - margin.left - margin.right,
-            height = 100 - margin.top - margin.bottom;
-
-        var xScale = d3.scale.ordinal()
-                  .rangeRoundBands([0, width], .1);
-            
-        var yScale = d3.scale.linear()
-                  .range([height, 0]);
-
-        var barSVGh = d3.select(".barChart")
-                    .append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", 50+ height + margin.top + margin.bottom)
-                    .append("g")
-                    .attr("transform", "translate("+ margin.left + "," + margin.top + ")");
-
-        var bar = barSVGh.selectAll("rect")
-                     .data(data)
-                     .enter()
-                     .append("rect"); 
-
-        var xAxis = d3.svg.axis()
-                          .scale(xScale)
-                          .orient("bottom");
-
-        var yAxis = d3.svg.axis()
-                          .scale(yScale)
-                          .orient("left")
-                          .ticks(6);
-        
-        xScale.domain(data.map(function(d,i) { return sortArray[i].id; }));
-        yScale.domain([0, d3.max(data, function(d,i) { return sortArray[i].stars; })]);
-
-        barSVGh.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis)
-            .selectAll("text")  
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-            .attr("transform", function(d) {
-              return "rotate(-45)" 
-             })
-            .text(function(d,i) {
-              return sortArray[i].dateLabel;
-            })
-
-        barSVGh.append("g")
-            .attr("class", "y axis")
-            .call(yAxis)
-            .append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", ".71em")
-            .style("text-anchor", "end")
-            .text("Stars");
-
-        bar.attr("id", function(d,i) { return "#b1"+i })
-            .attr("x", function(d,i) {
-              return xScale(sortArray[i].id);
-            })
-            .attr("width", xScale.rangeBand())
-            .attr("y", function(d,i) { return yScale(sortArray[i].stars); })
-            .attr("height", function(d,i) { return height - yScale(sortArray[i].stars); })
-            .attr("fill", "steelblue")
-            .on("mouseover", function(d,i) {
-              svg.select("b1"+i)
-                 .transition()
-                 .duration(200)
-                 .attr("fill", "red" )
-            })
       }
 
       function showInfo(data, textBox, showPara, rectX){
@@ -418,30 +446,18 @@
       var sortBars = function(posArray,svg,buttonState) {
         curWidth = 0;
 
-        if(buttonState == 1) { //sort by helpful
-          posArray.sort(function(a,b) {
-            return a.width - b.width;
-          });
-        } else if(buttonState == -1){
-          posArray.sort(function(a,b) {
-            return b.width - a.width;
-          });
-        } else if(buttonState == 2) { //sort by date
-          posArray.sort(function(a,b) {
-            return a.date - b.date;
-          });
-        } else if(buttonState == -2) {
-          posArray.sort(function(a,b) {
-            return b.date - a.date;
-          });
-        } else if (buttonState == 3) { //sort by stars
-          posArray.sort(function(a,b) { 
-            return a.stars - b.stars;
-          })
-        } else if (buttonState == -3) {
-          posArray.sort(function(a,b) { 
-            return b.stars - a.stars;
-          })
+        if(buttonState == 1) { //sort by helpful ascending
+          posArray.sort(function(a,b) { return a.width - b.width; });
+        } else if(buttonState == -1){ //descending
+          posArray.sort(function(a,b) { return b.width - a.width; });
+        } else if(buttonState == 2) { //sort by date ascending
+          posArray.sort(function(a,b) { return a.date - b.date; });
+        } else if(buttonState == -2) { // descending
+          posArray.sort(function(a,b) { return b.date - a.date; });
+        } else if (buttonState == 3) { //sort by stars ascending
+          posArray.sort(function(a,b) { return a.stars - b.stars; });
+        } else if (buttonState == -3) { // descending
+          posArray.sort(function(a,b) { return b.stars - a.stars; });
         }
 
         posArray.forEach(function(d,i) {
@@ -454,10 +470,50 @@
              .attr("x", function(d) {
                 return posArray[i].x;
               })
-             // .attr("fill", function(d,i) { 
-             //    return ("rgb("+(d.rating* 50)+","+(d.rating*50)+",0)")
-             //  });
         });
+      }
+
+      function sortTimeline(sortArray,svg,sortmode,xScale,width,height,xAxis) {
+
+        if(sortmode%4 == 0) {
+          sortArray.sort(function(a,b) { return a.date-b.date;});
+        } else if (sortmode%4 == 1) {
+          sortArray.sort(function(a,b) { return b.date-a.date;});
+        } else if (sortmode%4 == 2) {
+          sortArray.sort(function(a,b) { return a.stars-b.stars;});
+        } else if (sortmode%4 == 3) {
+          sortArray.sort(function(a,b) { return b.stars-a.stars;});
+        }
+
+        xScale.domain(sortArray.map(function(d,i) { return sortArray[i].id; }));
+
+        // var x0 = xScale.domain(sortArray.sort(this.checked
+        //   ? function(a, b) { return b.id - a.id; }
+        //   : function(a, b) { return d3.ascending(a.date, b.date); })
+        //   .map(function(d) { return d.id; }))
+        //   .copy();
+
+        var transition = svg.transition().duration(200),
+            delay = function(d, i) { return i * 50; };
+        
+        sortArray.forEach(function(d,i) {  
+          svg.select("#b"+sortArray[i].id)
+             .transition()
+             .duration(300)
+             .attr("x", function(d) {
+                return xScale(sortArray[i].id);
+              });
+          })
+       
+        // transition.selectAll(".barChart")
+        //           .delay(delay)
+        //           .attr("x", function(d) { return x0(d.date); });
+
+        transition.select(".x.axis")
+                  .call(xAxis)
+                  .append("text")
+                  // .text(function(d,i) { return sortArray[i].dateLabel })
+
       }
 
       function changeMarkerState(svg,marker,buttonState,buttonID) {
