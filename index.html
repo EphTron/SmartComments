@@ -285,7 +285,7 @@
                .attr("dy", ".15em")
                .style("text-anchor", "end")
                .attr("transform", function(d) { return "rotate(-45)" })
-               // .text(function(d,i) { return sortArray[i].dateLabel });
+               .text(function(d,i) { return sortArray[i].dateLabel });
 
         barSVGh.append("g")
                .attr("class", "y axis")
@@ -306,8 +306,8 @@
               .attr("height", function(d,i) { return height - yScale(sortArray[i].stars); })
               .attr("fill", "lightgrey")
               .on("mouseover", function(d,i) {
-                barSVGh.select("#b"+i).attr("fill", "gold");
-                barSVG.select("#r"+i).attr("fill", "gold");
+                barSVGh.select("#b"+i).attr("fill", "#66CCFF");
+                barSVG.select("#r"+i).attr("fill", "#66CCFF");
                })
               .on("mouseout", function(d,i) { 
                 barSVGh.select("#b"+i).attr("fill", "lightgrey");
@@ -358,7 +358,7 @@
                 barSVGh.select("#b"+i)
                      .transition()
                      .duration(150)
-                     .style("fill","gold");
+                     .style("fill","#66CCFF");
                      
                 drawAnswers(answerSet,d.id);
               }
@@ -883,13 +883,13 @@
 
         xScale.domain(sortArray.map(function(d,i) { return sortArray[i].id; }));
 
-        var transition = svg.transition().duration(200),
+        var transition = svg.transition().duration(500),
             delay = function(d, i) { return i * 50; };
         
         sortArray.forEach(function(d,i) {  
           svg.select("#b"+sortArray[i].id)
              .transition()
-             .duration(300)
+             .duration(500)
              .attr("x", function(d) {
                 return xScale(sortArray[i].id);
               });
@@ -897,7 +897,7 @@
 
         transition.select(".x.axis")
                   .call(xAxis)
-                  .append("text")
+                  // .append("text")
                   // .text(function(d,i) { return sortArray[i].dateLabel })
       }
 
