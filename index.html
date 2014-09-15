@@ -698,7 +698,7 @@
             .attr("width", 50 )
             .attr("height", 20)
             .style("stroke", "black")
-            .attr("xlink:href",function(d,i){return "./pictures/"+i+"help.png"} );
+            .attr("xlink:href",function(d,i){return "./pictures/"+i+"help.png"});
         }else if (buttonState == 1){
           partArray = [w-100,50];
           d3.select(".sortButtons")
@@ -712,7 +712,7 @@
             .attr("width", 50 )
             .attr("height", 20)
             .style("stroke", "black")
-            .attr("xlink:href",function(d,i){return "./pictures/"+i+"help.png"} );
+            .attr("xlink:href",function(d,i){return "./pictures/"+i+"help.png"});
         } else if (buttonState == 2){
           d3.select(".sortButtons")
             .select("#b" + (activeButton-1))
@@ -739,7 +739,7 @@
             .attr("width", function(d,i) { return (partArray[i])})
             .attr("height", 14)
             .style("stroke", "black")
-            .attr("xlink:href",function(d,i){return "./pictures/"+(4-i)+"stars.png"} );
+            .attr("xlink:href",function(d,i){return "./pictures/"+(4-i)+"stars.png"});
         } else if (buttonState == -3){
           d3.select(".sortButtons")
             .select("#b" + (activeButton-1))
