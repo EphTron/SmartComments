@@ -384,7 +384,7 @@
                 d3.select(".answerChart").select("svg").remove();
               }
             })
-            .on("click", function (d) {
+            .on("click", function (d,i) {
               if (showPara == 1 || showPara == 0){
                 d3.select(".answerChart").select("svg").remove();
                 showPara = 2;
@@ -396,6 +396,10 @@
                  .transition()
                  .duration(100)
                  .attr("fill", colScl(dataset[activeId].helpAvg));
+                barSVGh.selectAll("rect")
+                     .transition()
+                     .duration(150)
+                     .style("fill","lightgrey");
 
                 showPara = 1;
                 activeId = d.id;;
