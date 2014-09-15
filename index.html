@@ -66,8 +66,7 @@
       var aMaxHelpAvg = 0;
       var aShowPara = 0;
       var dataset;
-      // TO DO today: addButton; answer visualization; write down some answers; activeButton color;
-      // TO DO general: add barchartdiagramm; add brushing and linkin; adjust text style;
+     
       d3.csv("leatherAnswers.csv", function(error,data){
         if(error) {
           console.log(error);
@@ -484,15 +483,25 @@
       }
 
       function showInfo(textBox,rectX){
+                
         if (showPara == 1 || showPara == 3){
           d3.select(".textBox")
             .style("display", "block");
           d3.select(".textBox")
+            .select(".textStars")
+            .text("Sterne:" + dataset[activeId].rating);
+          d3.select(".textBox")
             .select(".textNr")
-            .text("Nr.:" + dataset[activeId].id);
+            .text("Nr.:" + dataset[activeId].id + "  Date:" + dataset[activeId].date);
+          d3.select(".textBox")
+            .select(".textTitle")
+            .text(dataset[activeId].infoTitle);
           d3.select(".textBox")
             .select(".textInfo")
-            .text("Sterne: "+ dataset[activeId].rating + "\n" + dataset[activeId].infoText);
+            .text(dataset[activeId].infoText);
+          d3.select(".textBox")
+            .select(".textHelp")
+            .text(dataset[activeId].helpPos + " out of " +dataset[activeId].helpAll + " found this Review helpfull.");
           if (showPara != 2) {
             textStyle(textBox,rectX,250);
           }
@@ -691,13 +700,6 @@
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
 								  .range([1,w-correct]);
-        return m(mapTo(val));
-      }
-      
-      function mapToTextBox(val,maxW,aCorrect) {
-        var m = d3.scale.linear()
-								  .domain([0,maxW])
-								  .range([1,800-aCorrect]);
         return m(mapTo(val));
       }
 

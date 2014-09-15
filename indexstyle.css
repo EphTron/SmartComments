@@ -60,6 +60,29 @@ body {
     user-select: none;
 }
 
+.textNr{
+	float: left;
+  width: 200px;
+}
+.textAuthor{
+  float: left;
+  width: 200px;
+}
+.textStars{
+  float: right;
+  width: 200px;
+}
+.textHelp{
+  float: left;
+  width: 200px;
+}
+.textTitle{
+  float: left;
+  width: 400px;
+  font-weight:bold;
+  text-align: center;
+  font-family: 'open sans';
+}
 
 .sortLegend{
   height: 30;
