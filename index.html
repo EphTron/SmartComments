@@ -119,7 +119,7 @@
           
           var minReviewLen = d3.min(data,function(d) { return d.infoText.length });
           var maxReviewLen = d3.max(data,function(d) { return d.infoText.length });
-          console.log("min: " + minReviewLen + "  max: " +maxReviewLen);
+          // console.log("min: " + minReviewLen + "  max: " + maxReviewLen);
 
           var timeFormat = d3.time.format("%B %d, %Y");
           dataset.forEach(function(d,i) {
@@ -340,14 +340,14 @@
                           d3.select(".barSVGv")
                             .transition()
                             .duration(300)
-                            .style("height", 0);
+                            .attr("height", 0);
                           timelineLabel.text("show timeline"); 
                           timelineMarker.attr("d", "M "+(width/2-20)+",5 L "+(width/2)+",15 L "+(width/2+20)+",5")                         
                         } else {
                           d3.select(".barSVGv")
                             .transition()
                             .duration(300)
-                            .style("height", 150);
+                            .attr("height", 150);
                           timelineLabel.text("hide timeline");
                           timelineMarker.attr("d", "M "+(width/2-20)+",15 L "+(width/2)+",5 L "+(width/2+20)+",15")
                         }
