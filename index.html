@@ -120,15 +120,17 @@
           var maxReviewLen = d3.max(data,function(d) { return d.infoText.length });
           console.log("min: " + minReviewLen + "  max: " +maxReviewLen);
 
-
           var timeFormat = d3.time.format("%B %d, %Y");
           dataset.forEach(function(d,i) {
             posArray.push({id: d.id, 
                            width: mapToScreen(d.helpAvg),
+                           height: calcHeight(d.infoText.length),
                            x: curWidth,
                            stars: ((d.rating*1000)+(mapTo(d.helpAvg))+(d.id/1000)),
                            rating: d.rating,
-                           date: timeFormat.parse(d.date) });
+                           date: timeFormat.parse(d.date),
+                           length: d.infoText.length
+                           });
             curWidth += mapToScreen(d.helpAvg);
             if (parseInt(d.helpAvg) > parseInt(dataset[mostHelpfulId].helpAvg)) {
               mostHelpfulId = d.id;
@@ -178,7 +180,7 @@
         var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
                          {id:1 ,state:"sort by: date",  value:2},
                          {id:2 ,state:"sort by: stars",   value:3},
-                         {id:3 ,state:"none",    value:4},
+                         {id:3 ,state:"sort by: review length", value:4},
                          {id:4 ,state:"none",    value:5}];
 
         var buttonSVG = d3.select(".sortButtons")
@@ -698,6 +700,15 @@
         }
       }
 
+      function calcHeight(length) {
+        if(length < 300)
+          return 30;
+        else if (length > 300 && length < 600)
+          return 40;
+        else
+          return 50;
+      }
+
       function mapToScreen(val) {
         var m = d3.scale.linear()
 								  .domain([0,totalWidth])
@@ -727,6 +738,10 @@
           posArray.sort(function(a,b) { return a.stars - b.stars; });
         } else if (buttonState == -3) { // descending
           posArray.sort(function(a,b) { return b.stars - a.stars; });
+        } else if (buttonState == 4) {  // sort by ascending review length
+          posArray.sort(function(a,b) { return a.length - b.length; });
+        } else if (buttonState == -4) { // descending
+          posArray.sort(function(a,b) { return b.length - a.length; });
         }
 
         posArray.forEach(function(d,i) {
