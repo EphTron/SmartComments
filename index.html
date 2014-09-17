@@ -15,29 +15,29 @@
         <div class="productFrame">
           <img src="./pictures/leatherAmazon.png" alt="Picture Bag" width="1400">
         </div>
-          <div class="smartComments">
-              <h4>Kundenrezensionen</h4>
-              <div class="timeline"></div>
-              <div class="barChart"></div>
-              <div class="sortButtons" unselectable="yes" onselectstart="return false"></div>
-              <div class="sortLegend"></div>
-              <div class="horizontalChart"></div>
-              <div class="textBox">
-                <div class="textNr"></div>
-                <div class="textAuthor"></div>
-                <div class="textStars"></div>
-                <div class="textTitle"></div>
-                <div class="textInfo"></div>
-                <div class="textHelp"></div>
-                <div class="answerChart"></div>
-                <div class ="answerBox" style="display:none">
-                  <div class="aTextNr"></div>
-                  <div class="aTextAuthor"></div>
-                  <div class="aTextInfo"></div>
-                  <div class="aTextHelp"></div>
-                </div>
+        <div class="smartComments">
+            <h4>Kundenrezensionen</h4>
+            <div class="timeline"></div>
+            <div class="barChart"></div>
+            <div class="sortButtons" unselectable="yes" onselectstart="return false"></div>
+            <div class="sortLegend"></div>
+            <div class="horizontalChart"></div>
+            <div class="textBox">
+              <div class="textNr"></div>
+              <div class="textAuthor"></div>
+              <div class="textStars"></div>
+              <div class="textTitle"></div>
+              <div class="textInfo"></div>
+              <div class="textHelp"></div>
+              <div class="answerChart"></div>
+              <div class ="answerBox" style="display:none">
+                <div class="aTextNr"></div>
+                <div class="aTextAuthor"></div>
+                <div class="aTextInfo"></div>
+                <div class="aTextHelp"></div>
               </div>
-          </div>
+            </div>
+        </div>
       </div>
     </div>
 
@@ -338,15 +338,13 @@
                         timelineToggle += 1;
                         if(timelineToggle%2 == 0){
                           d3.select(".barSVGv")
-                            .transition()
-                            .duration(300)
+                            .transition().duration(300)
                             .attr("height", 0);
                           timelineLabel.text("show timeline"); 
                           timelineMarker.attr("d", "M "+(width/2-20)+",5 L "+(width/2)+",15 L "+(width/2+20)+",5")                         
                         } else {
                           d3.select(".barSVGv")
-                            .transition()
-                            .duration(300)
+                            .transition().duration(300)
                             .attr("height", 150);
                           timelineLabel.text("hide timeline");
                           timelineMarker.attr("d", "M "+(width/2-20)+",15 L "+(width/2)+",5 L "+(width/2+20)+",15")
@@ -413,8 +411,7 @@
               if(showPara != 2){
                 if (showPara == 3){
                 barSVGh.select("#r"+parseInt(activeId))
-                   .transition()
-                   .duration(100)
+                   .transition().duration(100)
                    .attr("fill", colScl(dataset[activeId].helpAvg));
                 }
                 showPara = 1;
@@ -426,20 +423,17 @@
                 showInfo(textBox,rectX);
                 
                 barSVGh.select("#r"+parseInt(d.id))
-                    .transition()
-                    .duration(100)
+                    .transition().duration(100)
                     .attr("fill", "#66CCFF");
 
                 barSVGh.select("#p")
-                      .transition()
-                      .duration(100)
+                      .transition().duration(100)
                       .style("fill", "#66CCFF")
                       .style("stroke", "#66CCFF")
                       .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
                       
                 barSVGv.select("#b"+i)
-                     .transition()
-                     .duration(150)
+                     .transition().duration(150)
                      .style("fill","#66CCFF");
                      
                 drawAnswers(answerSet,d.id);
@@ -448,17 +442,14 @@
             .on("mouseout",function (d,i) {
               if(showPara != 2){
                 barSVGh.select("#r"+parseInt(d.id))
-                   .transition()
-                   .duration(100)
+                   .transition().duration(100)
                    .attr("fill", colScl(d.helpAvg));
                 barSVGh.select("#p")
-                      .transition()
-                      .duration(50)
+                      .transition().duration(150)
                       .style("fill", "white")
                       .style("stroke", "white");
                 barSVGv.select("#b"+i)
-                     .transition()
-                     .duration(150)
+                     .transition().duration(150)
                      .style("fill","lightgrey");
                 showPara = 0;
                 activeId = d.id;
@@ -487,15 +478,13 @@
 
                 showInfo(textBox,rectX);
                 barSVGh.select("#r"+parseInt(d.id))
-                  .transition()
-                  .duration(100)
+                  .transition().duration(100)
                   .attr("fill", "#66CCFF");
 
                 var width = findByID(posArray,activeId).width;
                 var x1 = parseFloat(rectX) + parseFloat(width/2);
                 barSVGh.select("#p")
-                      .transition()
-                      .duration(100)
+                      .transition().duration(100)
                       .style("fill", "#66CCFF")
                       .style("stroke", "#66CCFF")
                       .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
@@ -523,21 +512,18 @@
                .attr("fill", "lightgrey")
                .on("mouseover", function(d){
                   buttonSVG.select("#b"+parseInt(d.id))
-                    .transition()
-                    .duration(100)
+                    .transition().duration(100)
                     .attr("fill", "lightblue");
                 })
                .on("mouseout", function(d){
                   buttonSVG.select("#b"+parseInt(d.id))
-                    .transition()
-                    .duration(100)
+                    .transition().duration(100)
                     .attr("fill", "lightgrey");
                 })
                .on("click", function(d) {
                   activeButton = d.value;
                   buttonSVG.select("#b"+parseInt(d.id))
-                    .transition()
-                    .duration(100)
+                    .transition().duration(100)
                     .attr("fill", "red");
                   clicked = clicked*-1;
                   var buttonState = clicked*d.value;
@@ -686,13 +672,11 @@
                 showAnswer(subSet,answerBox,rectX);
                 console.log("AR = " + parseInt(d.id));
                 answerSVG.select("#aR"+parseInt(d.id))
-                    .transition()
-                    .duration(100)
+                    .transition().duration(100)
                     .attr("fill", "#66CCFF");
 
                 answerSVG.select("#aP")
-                      .transition()
-                      .duration(100)
+                      .transition().duration(100)
                       .style("fill", "#66CCFF")
                       .style("stroke", "#66CCFF")
                       .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
@@ -702,12 +686,10 @@
               if(aShowPara != 2){
                 
                 answerSVG.select("#aR"+parseInt(d.id))
-                   .transition()
-                   .duration(100)
+                   .transition().duration(100)
                    .attr("fill", "lightgray");
                 answerSVG.select("#aP")
-                      .transition()
-                      .duration(50)
+                      .transition().duration(50)
                       .style("fill", "white")
                       .style("stroke", "white");
                 aShowPara = 0;
@@ -722,8 +704,7 @@
                 console.log("clicked ->"+ aShowPara);
               } else if (aShowPara == 2){
                 answerSVG.select("#aR"+parseInt(activeAId))
-                 .transition()
-                 .duration(100)
+                 .transition().duration(100)
                  .attr("fill", "lightgray");
                  //.attr("fill", colScl(subSet[activeAId].helpAvg));
 
@@ -734,14 +715,12 @@
                 var rectX = aW*d.id;
                 showAnswer(subSet,answerBox,rectX);
                 answerSVG.select("#aR"+parseInt(d.id))
-                  .transition()
-                  .duration(100)
+                  .transition().duration(100)
                   .attr("fill", "#66CCFF");
 
                 var x1 = parseFloat(rectX) + parseFloat(aW/2);
                 answerSVG.select("#aP")
-                  .transition()
-                  .duration(100)
+                  .transition().duration(100)
                   .style("fill", "#66CCFF")
                   .style("stroke", "#66CCFF")
                   .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );
@@ -826,8 +805,7 @@
           posArray[i].x = curWidth;
           curWidth += w_tmp;
           svg.select("#r"+(posArray[i].id))
-             .transition()
-             .duration(delay)
+             .transition().duration(delay)
              .attr("x", function(d) {
                 return posArray[i].x;
               });
@@ -839,8 +817,7 @@
         // console.log("x = " + x1);
         if(showPara == 2 || showPara == 3){
           svg.select("#p")
-              .transition()
-              .duration(delay)
+              .transition().duration(delay)
               .style("fill", "#66CCFF")
               .style("stroke", "#66CCFF")
               .attr("points",(x1+","+50+","+(x1-10)+","+60+","+(x1+10)+","+60) );

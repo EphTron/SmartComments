@@ -97,7 +97,6 @@ h4 {
 }
 
 .horizontalChart{
-
   height: 60px;
   background-color: white;
 }
@@ -120,7 +119,7 @@ h4 {
   -o-border-image: -o-linear-gradient(#66CCFF, rgba(255, 255, 255, 0)) 1 100%;
   border-bottom-style:none;
   border-bottom-color: white;
-  /* border-image: linear-gradient(to bottom, #66CCFF, rgba(255, 255, 255, 0)) 1 100%; */
+  /*border-image: linear-gradient(to bottom, #66CCFF, rgba(255, 255, 255, 0)) 1 100%; */*/
 }
 
 .answerBox{
