@@ -17,6 +17,8 @@
         </div>
           <div class="smartComments">
               <h4>Kundenrezensionen</h4>
+              <div class="timeline"></div>
+              <div class="barChart"></div>
               <div class="sortButtons" unselectable="yes" onselectstart="return false"></div>
               <div class="sortLegend"></div>
               <div class="horizontalChart"></div>
@@ -36,7 +38,6 @@
                 </div>
               </div>
           </div>
-          <div class="barChart"></div>
       </div>
     </div>
 
@@ -63,6 +64,7 @@
       var aMinHelpAvg = 0;
       var aMaxHelpAvg = 0;
       var aShowPara = 0;
+      var timelineToggle = 0;
       var dataset;
      
       d3.csv("leatherAnswers.csv", function(error,data){
@@ -156,7 +158,8 @@
 
       function setup(data) {
 
-        //horizontal chart setup
+        // --- HORIZONTAL - BARCHART ------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
         var barSVGh = d3.select(".horizontalChart")
                     .append("svg")
                     .attr("width", w)
@@ -176,7 +179,8 @@
                            .domain([minHelpAvg,0,maxHelpAvg])
                            .range(["#D37575","lightgray","green"]);
 
-        //button setup
+        // --- BUTTONS --------------------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
         var buttArray = [{id:0 ,state:"sort by: helpful", value:1},
                          {id:1 ,state:"sort by: date",  value:2},
                          {id:2 ,state:"sort by: stars",   value:3},
@@ -198,23 +202,28 @@
                               .enter()
                               .append("text");
 
-        //marker setup
+        // --- MARKER ---------------------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
         var marker = buttonSVG.selectAll("polygon")
                               .data(buttArray)
                               .enter()
                               .append("polygon");
 
-        //bar chart setup
+        // --- VERTICAL - BARCHART --------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
         var margin = {top: 20, right: 20, bottom: 30, left: 40},
             width = window.innerWidth - margin.left - margin.right,
             height = 100 - margin.top - margin.bottom;
 
         var barSVGv = d3.select(".barChart")
                         .append("svg")
+                        .attr("class", "barSVGv")
                         .attr("width", width + margin.left + margin.right)
-                        .attr("height", 50+ height + margin.top + margin.bottom)
+                        .attr("height", 0)
+                        // .attr("height", 50+ height + margin.top + margin.bottom)
                         .append("g")
                         .attr("transform", "translate("+ margin.left + "," + margin.top + ")");
+
 
         var vBars = barSVGv.selectAll("rect")
                          .data(data)
@@ -240,11 +249,25 @@
                           .orient("left")
                           .ticks(6);
 
-        //return values
+        // --- TIMELINE - TOGGLE ----------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
+        var timelineSVG = d3.select(".timeline")
+                            .append("svg")
+                            .attr("width", width + margin.left + margin.right)
+                            .attr("height", 20);
+        
+        var timelineButton = timelineSVG.append("rect");
+        var timelineMarker = timelineSVG.append("path");
+        var timelineLabel  = timelineSVG.append("text");
+
+        // --- RETURN VALUES --------------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
         var values = [buttonSVG,barSVGh,hBars,buttons,labels,
                       buttArray,marker,textBox,colorScale,
                       pointer,barSVGv,xScale,yScale,vBars,
-                      xAxis,yAxis,margin,width,height];
+                      xAxis,yAxis,margin,width,height,
+                      timelineSVG,timelineButton,timelineMarker,
+                      timelineLabel];
         
         return values;
       }
@@ -270,11 +293,66 @@
         var margin    = setupData[16];
         var width     = setupData[17];
         var height    = setupData[18];
+        var timelineSVG    = setupData[19];
+        var timelineButton = setupData[20];
+        var timelineMarker = setupData[21];
+        var timelineLabel  = setupData[22];
 
         var bCnt = buttArray.length; // buttonCount
+        
+        // --- POINTER --------------------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
         pointer.attr("id", "p")
                .style("fill", "white")
-               .style("stroke", "white"); 
+               .style("stroke", "white");
+
+        // --- TOGGLE - TIMELINE ----------------------------------------------------------------- //
+        // --------------------------------------------------------------------------------------- //
+        timelineLabel.attr("x", 50)
+                     .attr("y", 15)
+                     .text("show timeline");
+
+        timelineMarker.attr("d", "M "+(width/2-20)+",5 L "+(width/2)+",15 L "+(width/2+20)+",5")
+                      .style("fill", "lightgrey")
+                      .style("stroke", "#6E6E6E")
+                      .style("stroke-width", 2)                     
+
+        timelineButton.attr("x", 20)
+                      .attr("y", 0)
+                      .attr("width", width+20)
+                      .attr("height", 20)
+                      .attr("fill", "lightgrey")
+                      .attr("stroke", "lightgrey")
+                      .on("mouseover", function() {
+                        timelineButton.transition().duration(200)
+                                      .attr("fill", "#66CCFF");
+                        timelineMarker.transition().duration(200)
+                                      .style("fill", "#66CCFF");
+                       })
+                      .on("mouseout", function() { 
+                        timelineButton.transition().duration(200)
+                                      .attr("fill", "lightgrey");
+                        timelineMarker.transition().duration(200)
+                                      .style("fill", "lightgrey");                                      
+                       })
+                      .on("click", function() {
+                        timelineToggle += 1;
+                        if(timelineToggle%2 == 0){
+                          d3.select(".barSVGv")
+                            .transition()
+                            .duration(300)
+                            .style("height", 0);
+                          timelineLabel.text("show timeline"); 
+                          timelineMarker.attr("d", "M "+(width/2-20)+",5 L "+(width/2)+",15 L "+(width/2+20)+",5")                         
+                        } else {
+                          d3.select(".barSVGv")
+                            .transition()
+                            .duration(300)
+                            .style("height", 150);
+                          timelineLabel.text("hide timeline");
+                          timelineMarker.attr("d", "M "+(width/2-20)+",15 L "+(width/2)+",5 L "+(width/2+20)+",15")
+                        }
+                       });        
 
         // --- VERTICAL - BARCHART --------------------------------------------------------------- //
         // --------------------------------------------------------------------------------------- //
@@ -397,7 +475,7 @@
                 console.log("clicked ->"+ showPara);
                 drawAnswers(answerSet,d.id);
               } else if (showPara == 2){
-                barSVG.select("#r"+parseInt(activeId))
+                barSVGh.select("#r"+parseInt(activeId))
                  .transition()
                  .duration(100)
                  .attr("fill", colScl(dataset[activeId].helpAvg));
