@@ -18,7 +18,8 @@ body {
 
 h4 {
   font-size: 20px;
-  font-weight: bold; 
+  font-weight: bold;
+  margin: 10px;
 }
 
 .main {
@@ -52,7 +53,7 @@ h4 {
 .smartComments{
 	float: left;
 	width: 100%;
-	height: 630px;
+	height: 720px;
 	background-color: white;
 }
 
@@ -79,6 +80,7 @@ h4 {
   width: 200px;
 }
 .textHelp{
+  padding:10px;
   float: left;
   width: 200px;
 }
@@ -138,8 +140,9 @@ h4 {
 }
 
 .textInfo{
-overflow-y:auto;
-  width: 800px;
+  overflow-y:auto;
+  padding: 10px;
+  width: 780px;
   height: 150px;
 }
 

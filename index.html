@@ -90,7 +90,6 @@
         if(error) {
           console.log(error);
         } else {
-
           dataset = data;
           dataset.forEach(function(d) {
             d["helpNeg"] = (d.helpAll - d.helpPos);
@@ -572,7 +571,7 @@
             .style("display", "block");
           d3.select(".textBox")
             .select(".textStars")
-            .text("Sterne:" + dataset[activeId].rating);
+            .text("Stars:" + dataset[activeId].rating);
           d3.select(".textBox")
             .select(".textNr")
             .text("Nr.:" + dataset[activeId].id + "  Date:" + dataset[activeId].date);
@@ -584,7 +583,7 @@
             .text(dataset[activeId].infoText);
           d3.select(".textBox")
             .select(".textHelp")
-            .text(dataset[activeId].helpPos + " out of " +dataset[activeId].helpAll + " found this Review helpfull.");
+            .text(dataset[activeId].helpPos + " out of " +dataset[activeId].helpAll + " found this Review helpful.");
           if (showPara != 2) {
             textStyle(textBox,rectX,250);
           }
