@@ -1000,10 +1000,10 @@
         var x = findByID(posArray,activeId).x;
         var x1 = parseFloat(x) + parseFloat(width/2);
         d3.select(".barChart")
-              .select("#r"+parseInt(activeId))
-              .transition()
-              .duration(100)
-              .attr("fill", "#66CCFF");
+          .select("#r"+parseInt(activeId))
+          .transition()
+          .duration(100)
+          .attr("fill", "#66CCFF");
         showInfo(textBox,x);
         textStyle(textBox,x,250);
   
